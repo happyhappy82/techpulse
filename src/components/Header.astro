@@ -1,0 +1,77 @@
+---
+const navItems = [
+  { name: '홈', href: '/' },
+  { name: '노트북', href: '/laptops' },
+  { name: '스마트폰', href: '/smartphones' },
+  { name: '가젯', href: '/gadgets' },
+];
+---
+
+<header class="mb-16">
+  <div class="flex items-center justify-between">
+    <!-- Logo -->
+    <a href="/" class="flex items-center gap-3 group">
+      <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
+        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold text-brand-text">TechPulse</h1>
+        <p class="text-xs text-brand-text-secondary">기술의 맥박</p>
+      </div>
+    </a>
+
+    <!-- Navigation (Desktop) -->
+    <nav class="hidden md:flex items-center gap-6">
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class="text-caption text-brand-text-secondary hover:text-brand-primary font-medium transition-colors"
+        >
+          {item.name}
+        </a>
+      ))}
+    </nav>
+
+    <!-- Mobile Menu Button -->
+    <button
+      id="mobile-menu-button"
+      class="md:hidden p-2 rounded-lg hover:bg-brand-bg-secondary transition-colors"
+      aria-label="메뉴 열기"
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Menu -->
+  <nav id="mobile-menu" class="hidden md:hidden mt-4 p-4 rounded-card bg-brand-bg-secondary">
+    {navItems.map((item) => (
+      <a
+        href={item.href}
+        class="block py-3 text-caption text-brand-text-secondary hover:text-brand-primary font-medium transition-colors border-b border-brand-border last:border-0"
+      >
+        {item.name}
+      </a>
+    ))}
+  </nav>
+</header>
+
+<script>
+  // Mobile menu toggle
+  const menuButton = document.getElementById('mobile-menu-button');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  menuButton?.addEventListener('click', () => {
+    mobileMenu?.classList.toggle('hidden');
+  });
+</script>
+
+<style>
+  header {
+    position: relative;
+    z-index: 10;
+  }
+</style>

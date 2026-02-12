@@ -1,0 +1,232 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  canonical?: string;
+  ogType?: string;
+  ogImage?: string;
+  publishedTime?: string;
+  modifiedTime?: string;
+  keywords?: string;
+}
+
+const {
+  title,
+  description,
+  canonical = Astro.url.href,
+  ogType = 'website',
+  ogImage = '/opengraph-image.png',
+  publishedTime,
+  modifiedTime,
+  keywords = '전자제품 리뷰, 노트북 추천, 스마트폰 리뷰, 가젯 리뷰, 테크 가이드, 제품 비교',
+} = Astro.props;
+
+const siteUrl = 'https://www.techpulse.reviews';
+const siteName = 'TechPulse';
+
+// Website Schema
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": siteName,
+  "alternateName": "테크펄스",
+  "url": siteUrl,
+  "description": "전자제품, 테크 제품 리뷰 및 비교 정보를 제공하는 전문 사이트",
+  "publisher": {
+    "@type": "Organization",
+    "name": siteName,
+    "url": siteUrl,
+    "logo": {
+      "@type": "ImageObject",
+      "url": `${siteUrl}/logo.png`,
+    },
+  },
+};
+
+// Organization Schema
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": siteName,
+  "alternateName": "테크펄스",
+  "url": siteUrl,
+  "logo": `${siteUrl}/logo.png`,
+  "description": "전자제품, 테크 제품 리뷰 및 비교 정보를 제공하는 전문 사이트",
+  "sameAs": [],
+};
+---
+
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5" />
+    <link rel="icon" type="image/png" href="/icon.png" />
+    <link rel="apple-touch-icon" href="/apple-icon.png" />
+
+    <!-- Primary Meta Tags -->
+    <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+    <meta name="keywords" content={keywords} />
+    <meta name="author" content={siteName} />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={`${siteUrl}${ogImage}`} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={title} />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:locale" content="ko_KR" />
+    {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+    {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonical} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={`${siteUrl}${ogImage}`} />
+    <meta name="twitter:image:alt" content={title} />
+
+    <!-- DNS Prefetch & Preconnect -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+
+    <!-- Pretendard Font -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+    />
+
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
+
+    <!-- Import Global Styles -->
+    <link rel="stylesheet" href="/src/styles/global.css" />
+  </head>
+  <body class="mx-auto max-w-container bg-brand-bg px-5 py-12 text-brand-text font-sans antialiased">
+    <slot />
+
+    <!-- Google Analytics (Lazy Load) -->
+    <script is:inline>
+      window.addEventListener('load', function() {
+        // GA4 코드를 여기에 추가하세요
+        // window.dataLayer = window.dataLayer || [];
+        // function gtag(){dataLayer.push(arguments);}
+        // gtag('js', new Date());
+        // gtag('config', 'G-XXXXXXXXXX');
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  @import 'tailwindcss';
+
+  :root {
+    --brand-primary: #2563EB;
+    --brand-secondary: #7C3AED;
+    --brand-accent: #10B981;
+    --brand-text: #0F172A;
+    --brand-bg: #FFFFFF;
+    --brand-border: #E2E8F0;
+  }
+
+  * {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+  }
+
+  html,
+  body {
+    max-width: 100vw;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.6;
+    word-break: keep-all;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  /* 유틸리티 클래스 */
+  .card {
+    border: 1px solid var(--brand-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    background: white;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    transition: box-shadow 0.2s ease;
+  }
+
+  .card:hover {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .badge-primary {
+    background: var(--brand-primary);
+    color: white;
+  }
+
+  .badge-success {
+    background: var(--brand-accent);
+    color: white;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background: var(--brand-primary);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #1d4ed8;
+  }
+
+  .btn-outline {
+    border: 1px solid var(--brand-border);
+  }
+
+  .btn-outline:hover {
+    background: #F8FAFC;
+  }
+</style>

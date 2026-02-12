@@ -1,0 +1,218 @@
+---
+interface Spec {
+  label: string;
+  value: string;
+  highlight?: boolean;
+}
+
+interface SpecGroup {
+  category: string;
+  icon?: string;
+  specs: Spec[];
+}
+
+interface Props {
+  specGroups: SpecGroup[];
+}
+
+const { specGroups } = Astro.props;
+---
+
+<div class="spec-table-wrapper">
+  <div class="spec-table-header">
+    <h3 class="text-subtitle font-bold text-brand-text mb-2">
+      📋 상세 스펙
+    </h3>
+    <p class="text-caption text-brand-text-secondary">
+      제품의 세부 사양을 확인하세요
+    </p>
+  </div>
+
+  <div class="spec-groups">
+    {specGroups.map((group) => (
+      <div class="spec-group">
+        <div class="group-header">
+          {group.icon && <span class="group-icon">{group.icon}</span>}
+          <h4 class="group-title">{group.category}</h4>
+        </div>
+
+        <div class="specs-list">
+          {group.specs.map((spec) => (
+            <div class={`spec-row ${spec.highlight ? 'highlight' : ''}`}>
+              <dt class="spec-label">{spec.label}</dt>
+              <dd class="spec-value">{spec.value}</dd>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .spec-table-wrapper {
+    background: white;
+    border: 1px solid var(--brand-border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 24px 0;
+  }
+
+  .spec-table-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--brand-border);
+  }
+
+  .spec-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .spec-group {
+    background: var(--brand-bg-secondary);
+    border-radius: 8px;
+    padding: 20px;
+    transition: all 0.3s ease;
+  }
+
+  .spec-group:hover {
+    background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .group-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--brand-border);
+  }
+
+  .group-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .group-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--brand-text);
+  }
+
+  .specs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .spec-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--brand-border);
+    transition: all 0.2s ease;
+  }
+
+  .spec-row:last-child {
+    border-bottom: none;
+  }
+
+  .spec-row:hover {
+    background: white;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-left: -12px;
+    margin-right: -12px;
+    border-radius: 6px;
+  }
+
+  .spec-row.highlight {
+    background: linear-gradient(90deg, #DBEAFE 0%, #E0E7FF 100%);
+    padding: 12px;
+    margin-left: -12px;
+    margin-right: -12px;
+    border-radius: 6px;
+    border-bottom: none;
+  }
+
+  .spec-row.highlight .spec-label {
+    color: var(--brand-primary);
+    font-weight: 700;
+  }
+
+  .spec-row.highlight .spec-value {
+    color: var(--brand-text);
+    font-weight: 600;
+  }
+
+  .spec-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--brand-text-secondary);
+    display: flex;
+    align-items: center;
+  }
+
+  .spec-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--brand-text);
+    display: flex;
+    align-items: center;
+    word-break: break-word;
+  }
+
+  /* 반응형 */
+  @media (max-width: 768px) {
+    .spec-table-wrapper {
+      padding: 16px;
+    }
+
+    .spec-group {
+      padding: 16px;
+    }
+
+    .spec-row {
+      grid-template-columns: 1fr;
+      gap: 4px;
+      padding: 10px 0;
+    }
+
+    .spec-row:hover {
+      padding-left: 8px;
+      padding-right: 8px;
+      margin-left: -8px;
+      margin-right: -8px;
+    }
+
+    .spec-row.highlight {
+      padding: 10px 8px;
+      margin-left: -8px;
+      margin-right: -8px;
+    }
+
+    .spec-label {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .spec-value {
+      font-size: 13px;
+    }
+
+    .group-title {
+      font-size: 16px;
+    }
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .spec-row {
+      grid-template-columns: 180px 1fr;
+    }
+  }
+</style>

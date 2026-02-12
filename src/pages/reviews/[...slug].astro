@@ -1,0 +1,528 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import PriceComparison from '../../components/PriceComparison.astro';
+import SpecTable from '../../components/SpecTable.astro';
+
+// Static paths 생성
+export async function getStaticPaths() {
+  const reviews = await getCollection('reviews');
+  return reviews.map((review) => ({
+    params: { slug: review.slug },
+    props: { review },
+  }));
+}
+
+const { review } = Astro.props;
+const { Content } = await review.render();
+
+// 총 점수 계산
+function calculateTotalScore(scores: any) {
+  const { performance, design, display, battery, value } = scores;
+  if (display === 0) {
+    return Math.round((performance + design + battery + value) / 4);
+  }
+  return Math.round((performance + design + display + battery + value) / 5);
+}
+
+// 점수에 따른 색상 반환
+function getScoreColor(score: number): string {
+  if (score >= 90) return '#10B981'; // excellent
+  if (score >= 80) return '#3B82F6'; // great
+  if (score >= 70) return '#F59E0B'; // good
+  if (score >= 60) return '#EF4444'; // fair
+  return '#DC2626'; // poor
+}
+
+// 점수에 따른 등급 반환
+function getScoreLabel(score: number): string {
+  if (score >= 90) return '탁월';
+  if (score >= 80) return '우수';
+  if (score >= 70) return '양호';
+  if (score >= 60) return '보통';
+  return '미흡';
+}
+
+const totalScore = calculateTotalScore(review.data.scores);
+const scoreColor = getScoreColor(totalScore);
+const scoreLabel = getScoreLabel(totalScore);
+
+// 카테고리 한글 이름
+const categoryNames: Record<string, string> = {
+  laptop: '노트북',
+  smartphone: '스마트폰',
+  gadget: '가젯',
+};
+
+// 날짜 포맷팅
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+// 메타 정보
+const title = review.data.title;
+const description = review.data.description;
+const ogImage = review.data.ogImage || review.data.product.image;
+const keywords = review.data.keywords || `${review.data.product.brand} ${review.data.product.name} 리뷰, 가격, 스펙`;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  ogType="article"
+  ogImage={ogImage}
+  keywords={keywords}
+  publishedTime={review.data.publishedAt}
+  modifiedTime={review.data.updatedAt}
+>
+  <Header />
+
+  <main>
+    <article class="review-article">
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb">
+        <a href="/" class="breadcrumb-link">홈</a>
+        <span class="breadcrumb-separator">/</span>
+        <a href={`/${review.data.product.category}s`} class="breadcrumb-link">
+          {categoryNames[review.data.product.category]}
+        </a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">{review.data.product.name}</span>
+      </nav>
+
+      <!-- Product Header -->
+      <header class="product-header">
+        <div class="product-meta">
+          <span class="category-badge">{categoryNames[review.data.product.category]}</span>
+          {review.data.rank && (
+            <span class="rank-badge">#{review.data.rank} 순위</span>
+          )}
+        </div>
+        <h1 class="product-title">{review.data.product.name}</h1>
+        <p class="product-brand">{review.data.product.brand}</p>
+        <div class="article-info">
+          <time datetime={review.data.publishedAt}>
+            {formatDate(review.data.publishedAt)}
+          </time>
+          {review.data.updatedAt && (
+            <span class="updated-date">
+              (업데이트: {formatDate(review.data.updatedAt)})
+            </span>
+          )}
+          <span class="author">by {review.data.author}</span>
+        </div>
+      </header>
+
+      <!-- Score Summary -->
+      <section class="score-summary">
+        <div class="total-score-card">
+          <div class="total-score-circle" style={`--score-color: ${scoreColor}`}>
+            <svg width="160" height="160" viewBox="0 0 160 160">
+              <circle
+                cx="80"
+                cy="80"
+                r="70"
+                fill="none"
+                stroke="#E2E8F0"
+                stroke-width="12"
+              />
+              <circle
+                cx="80"
+                cy="80"
+                r="70"
+                fill="none"
+                stroke={scoreColor}
+                stroke-width="12"
+                stroke-linecap="round"
+                stroke-dasharray={`${(totalScore / 100) * 439.8} 439.8`}
+                transform="rotate(-90 80 80)"
+              />
+            </svg>
+            <div class="total-score-text">
+              <span class="score-number">{totalScore}</span>
+              <span class="score-label">{scoreLabel}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="individual-scores">
+          {review.data.scores.performance > 0 && (
+            <div class="score-item">
+              <span class="score-name">성능</span>
+              <div class="score-bar">
+                <div
+                  class="score-bar-fill"
+                  style={`width: ${review.data.scores.performance}%; background-color: ${getScoreColor(review.data.scores.performance)}`}
+                />
+              </div>
+              <span class="score-value">{review.data.scores.performance}</span>
+            </div>
+          )}
+          {review.data.scores.design > 0 && (
+            <div class="score-item">
+              <span class="score-name">디자인</span>
+              <div class="score-bar">
+                <div
+                  class="score-bar-fill"
+                  style={`width: ${review.data.scores.design}%; background-color: ${getScoreColor(review.data.scores.design)}`}
+                />
+              </div>
+              <span class="score-value">{review.data.scores.design}</span>
+            </div>
+          )}
+          {review.data.scores.display > 0 && (
+            <div class="score-item">
+              <span class="score-name">디스플레이</span>
+              <div class="score-bar">
+                <div
+                  class="score-bar-fill"
+                  style={`width: ${review.data.scores.display}%; background-color: ${getScoreColor(review.data.scores.display)}`}
+                />
+              </div>
+              <span class="score-value">{review.data.scores.display}</span>
+            </div>
+          )}
+          {review.data.scores.battery > 0 && (
+            <div class="score-item">
+              <span class="score-name">배터리</span>
+              <div class="score-bar">
+                <div
+                  class="score-bar-fill"
+                  style={`width: ${review.data.scores.battery}%; background-color: ${getScoreColor(review.data.scores.battery)}`}
+                />
+              </div>
+              <span class="score-value">{review.data.scores.battery}</span>
+            </div>
+          )}
+          {review.data.scores.value > 0 && (
+            <div class="score-item">
+              <span class="score-name">가성비</span>
+              <div class="score-bar">
+                <div
+                  class="score-bar-fill"
+                  style={`width: ${review.data.scores.value}%; background-color: ${getScoreColor(review.data.scores.value)}`}
+                />
+              </div>
+              <span class="score-value">{review.data.scores.value}</span>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <!-- Main Content -->
+      <div class="prose">
+        <Content />
+      </div>
+
+      <!-- Price Comparison -->
+      {review.data.prices && review.data.prices.length > 0 && (
+        <PriceComparison prices={review.data.prices} productName={review.data.product.name} />
+      )}
+
+      <!-- Spec Table -->
+      {review.data.specs && review.data.specs.length > 0 && (
+        <SpecTable specGroups={review.data.specs} />
+      )}
+    </article>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-logo">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+        </div>
+        <div>
+          <p class="font-bold text-brand-text">TechPulse</p>
+          <p class="text-small text-brand-text-secondary">기술의 맥박</p>
+        </div>
+      </div>
+      <p class="footer-text">
+        © 2024 TechPulse. All rights reserved.<br />
+        솔직한 리뷰로 현명한 선택을 돕습니다.
+      </p>
+    </div>
+  </footer>
+</BaseLayout>
+
+<style>
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* Breadcrumb */
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 32px;
+    font-size: 14px;
+  }
+
+  .breadcrumb-link {
+    color: var(--brand-text-secondary);
+    transition: color 0.2s ease;
+  }
+
+  .breadcrumb-link:hover {
+    color: var(--brand-primary);
+  }
+
+  .breadcrumb-separator {
+    color: var(--brand-text-secondary);
+  }
+
+  .breadcrumb-current {
+    color: var(--brand-text);
+    font-weight: 600;
+  }
+
+  /* Product Header */
+  .product-header {
+    margin-bottom: 48px;
+    text-align: center;
+  }
+
+  .product-meta {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .category-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    background: var(--brand-primary);
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 20px;
+  }
+
+  .rank-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    background: linear-gradient(135deg, var(--brand-secondary) 0%, var(--brand-primary) 100%);
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+  }
+
+  .product-title {
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--brand-text);
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+
+  .product-brand {
+    font-size: 20px;
+    color: var(--brand-text-secondary);
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .article-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--brand-text-secondary);
+  }
+
+  .updated-date {
+    color: var(--brand-accent);
+    font-weight: 500;
+  }
+
+  .author {
+    font-weight: 600;
+  }
+
+  /* Score Summary */
+  .score-summary {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 32px;
+    padding: 32px;
+    background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%);
+    border-radius: 16px;
+    margin-bottom: 48px;
+  }
+
+  .total-score-card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .total-score-circle {
+    position: relative;
+    width: 160px;
+    height: 160px;
+  }
+
+  .total-score-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  .score-number {
+    display: block;
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--score-color);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .score-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--brand-text-secondary);
+  }
+
+  .individual-scores {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .score-item {
+    display: grid;
+    grid-template-columns: 80px 1fr 40px;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .score-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--brand-text);
+  }
+
+  .score-bar {
+    height: 12px;
+    background: #E2E8F0;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 1s ease;
+  }
+
+  .score-value {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--brand-text);
+    text-align: right;
+  }
+
+  /* Prose (Markdown Content) */
+  .prose {
+    margin-bottom: 48px;
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 80px;
+    padding: 32px 0;
+    border-top: 2px solid var(--brand-border);
+  }
+
+  .footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .footer-text {
+    font-size: 14px;
+    color: var(--brand-text-secondary);
+    line-height: 1.6;
+  }
+
+  /* 반응형 */
+  @media (max-width: 768px) {
+    main {
+      padding: 0 16px;
+    }
+
+    .breadcrumb {
+      flex-wrap: wrap;
+      font-size: 12px;
+    }
+
+    .product-title {
+      font-size: 28px;
+    }
+
+    .product-brand {
+      font-size: 18px;
+    }
+
+    .article-info {
+      flex-direction: column;
+      gap: 4px;
+      font-size: 12px;
+    }
+
+    .score-summary {
+      grid-template-columns: 1fr;
+      gap: 24px;
+      padding: 24px;
+    }
+
+    .total-score-circle {
+      width: 140px;
+      height: 140px;
+    }
+
+    .score-number {
+      font-size: 40px;
+    }
+
+    .score-item {
+      grid-template-columns: 70px 1fr 35px;
+      gap: 8px;
+    }
+
+    .score-name {
+      font-size: 13px;
+    }
+
+    .score-value {
+      font-size: 14px;
+    }
+  }
+</style>

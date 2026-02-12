@@ -1,0 +1,32 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://www.techpulse.reviews/sitemap-index.xml
+Sitemap: https://www.techpulse.reviews/sitemap-0.xml
+
+# Crawl-delay for all bots (optional, helps prevent server overload)
+Crawl-delay: 1
+
+# Common bot-specific rules
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Slurp
+Allow: /
+
+# Block AI crawlers if desired (uncomment to enable)
+# User-agent: GPTBot
+# Disallow: /
+#
+# User-agent: ChatGPT-User
+# Disallow: /
+#
+# User-agent: CCBot
+# Disallow: /

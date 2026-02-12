@@ -1,0 +1,380 @@
+---
+interface Props {
+  slug: string;
+  title: string;
+  productName: string;
+  brand: string;
+  image: string;
+  totalScore: number;
+  scores: {
+    performance: number;
+    design: number;
+    display: number;
+    battery: number;
+    value: number;
+  };
+  rank?: number;
+  prices: Array<{
+    vendor: string;
+    price: number;
+    url: string;
+  }>;
+}
+
+const { slug, title, productName, brand, image, totalScore, scores, rank, prices } = Astro.props;
+
+// 점수에 따른 색상 반환
+function getScoreColor(score: number): string {
+  if (score >= 90) return '#10B981'; // excellent
+  if (score >= 80) return '#3B82F6'; // great
+  if (score >= 70) return '#F59E0B'; // good
+  if (score >= 60) return '#EF4444'; // fair
+  return '#DC2626'; // poor
+}
+
+// 종합점수 색상
+function getTotalScoreColor(score: number): string {
+  if (score >= 90) return '#10B981';
+  if (score >= 80) return '#3B82F6';
+  if (score >= 70) return '#F59E0B';
+  if (score >= 60) return '#EF4444';
+  return '#DC2626';
+}
+
+// 최저가 찾기
+const lowestPrice = Math.min(...prices.map((p) => p.price));
+
+// 가격 포맷팅
+function formatPrice(price: number): string {
+  return new Intl.NumberFormat('ko-KR').format(price);
+}
+---
+
+<div class="product-card-wrapper">
+  <a href={`/reviews/${slug}`} class="product-card-link">
+    <div class="card-header">
+      {rank && (
+        <div class="rank-badge">
+          <span class="rank-number">#{rank}</span>
+        </div>
+      )}
+    </div>
+
+    <div class="card-body">
+      <div class="image-wrapper">
+        <img src={image} alt={productName} class="product-image" />
+      </div>
+
+      <div class="product-info">
+        <h3 class="brand-name">{brand}</h3>
+        <h2 class="product-name">{productName}</h2>
+
+        <div class="score-section">
+          <div class="score-circle">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+              <circle
+                cx="50"
+                cy="50"
+                r="42"
+                fill="none"
+                stroke="#E2E8F0"
+                stroke-width="8"
+              />
+              <circle
+                cx="50"
+                cy="50"
+                r="42"
+                fill="none"
+                stroke={getTotalScoreColor(totalScore)}
+                stroke-width="8"
+                stroke-linecap="round"
+                stroke-dasharray={`${(totalScore / 100) * 264} 264`}
+                transform="rotate(-90 50 50)"
+              />
+            </svg>
+            <div class="score-text">
+              <span class="score-number">{totalScore}</span>
+            </div>
+          </div>
+
+          <div class="individual-scores">
+            {scores.performance > 0 && (
+              <div class="score-item">
+                <span class="score-label">성능</span>
+                <span class="score-value" style={`color: ${getScoreColor(scores.performance)}`}>
+                  {scores.performance}
+                </span>
+              </div>
+            )}
+            {scores.design > 0 && (
+              <div class="score-item">
+                <span class="score-label">디자인</span>
+                <span class="score-value" style={`color: ${getScoreColor(scores.design)}`}>
+                  {scores.design}
+                </span>
+              </div>
+            )}
+            {scores.display > 0 && (
+              <div class="score-item">
+                <span class="score-label">화면</span>
+                <span class="score-value" style={`color: ${getScoreColor(scores.display)}`}>
+                  {scores.display}
+                </span>
+              </div>
+            )}
+            {scores.battery > 0 && (
+              <div class="score-item">
+                <span class="score-label">배터리</span>
+                <span class="score-value" style={`color: ${getScoreColor(scores.battery)}`}>
+                  {scores.battery}
+                </span>
+              </div>
+            )}
+            {scores.value > 0 && (
+              <div class="score-item">
+                <span class="score-label">가성비</span>
+                <span class="score-value" style={`color: ${getScoreColor(scores.value)}`}>
+                  {scores.value}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div class="price-section">
+          <span class="price-label">최저가</span>
+          <span class="price-value">{formatPrice(lowestPrice)}원</span>
+        </div>
+
+        <div class="cta-button">
+          <span>자세히 보기</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </a>
+</div>
+
+<style>
+  .product-card-wrapper {
+    width: 100%;
+    height: 100%;
+  }
+
+  .product-card-link {
+    display: block;
+    height: 100%;
+  }
+
+  .card-header {
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  .rank-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 16px;
+    background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  }
+
+  .rank-number {
+    font-size: 14px;
+    font-weight: 800;
+    color: white;
+  }
+
+  .card-body {
+    background: white;
+    border: 1px solid var(--brand-border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+  }
+
+  .card-body:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px);
+    border-color: var(--brand-primary);
+  }
+
+  .image-wrapper {
+    width: 100%;
+    height: 200px;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .card-body:hover .product-image {
+    transform: scale(1.05);
+  }
+
+  .product-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .brand-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--brand-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .product-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--brand-text);
+    line-height: 1.3;
+    min-height: 48px;
+  }
+
+  .score-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%);
+    border-radius: 8px;
+  }
+
+  .score-circle {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    flex-shrink: 0;
+  }
+
+  .score-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  .score-number {
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--brand-text);
+  }
+
+  .individual-scores {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    flex: 1;
+  }
+
+  .score-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    background: white;
+    border-radius: 6px;
+  }
+
+  .score-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--brand-text-secondary);
+  }
+
+  .score-value {
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .price-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #FEF3C7;
+    border-radius: 8px;
+  }
+
+  .price-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #92400E;
+  }
+
+  .price-value {
+    font-size: 20px;
+    font-weight: 900;
+    color: #92400E;
+  }
+
+  .cta-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px;
+    background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .cta-button:hover {
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4);
+  }
+
+  /* 반응형 */
+  @media (max-width: 768px) {
+    .card-body {
+      padding: 16px;
+    }
+
+    .image-wrapper {
+      height: 180px;
+    }
+
+    .product-name {
+      font-size: 16px;
+      min-height: 42px;
+    }
+
+    .score-section {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .score-circle {
+      width: 80px;
+      height: 80px;
+    }
+
+    .score-number {
+      font-size: 28px;
+    }
+
+    .individual-scores {
+      width: 100%;
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>
