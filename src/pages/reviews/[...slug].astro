@@ -85,37 +85,16 @@ const keywords = review.data.keywords || `${review.data.product.brand} ${review.
 
   <main>
     <article class="review-article">
-      <!-- Breadcrumb -->
-      <nav class="breadcrumb">
-        <a href="/" class="breadcrumb-link">홈</a>
-        <span class="breadcrumb-separator">/</span>
-        <a href={`/${review.data.product.category}s`} class="breadcrumb-link">
-          {categoryNames[review.data.product.category]}
-        </a>
-        <span class="breadcrumb-separator">/</span>
-        <span class="breadcrumb-current">{review.data.product.name}</span>
-      </nav>
-
       <!-- Product Header -->
       <header class="product-header">
-        <div class="product-meta">
-          <span class="category-badge">{categoryNames[review.data.product.category]}</span>
-          {review.data.rank && (
-            <span class="rank-badge">#{review.data.rank} 순위</span>
-          )}
-        </div>
+        <a href="/" class="back-link">&larr; Back</a>
         <h1 class="product-title">{review.data.product.name}</h1>
-        <p class="product-brand">{review.data.product.brand}</p>
         <div class="article-info">
           <time datetime={review.data.publishedAt}>
             {formatDate(review.data.publishedAt)}
           </time>
-          {review.data.updatedAt && (
-            <span class="updated-date">
-              (업데이트: {formatDate(review.data.updatedAt)})
-            </span>
-          )}
-          <span class="author">by {review.data.author}</span>
+          <span class="separator">&middot;</span>
+          <span class="brand">{review.data.product.brand}</span>
         </div>
       </header>
 
@@ -123,25 +102,25 @@ const keywords = review.data.keywords || `${review.data.product.brand} ${review.
       <section class="score-summary">
         <div class="total-score-card">
           <div class="total-score-circle" style={`--score-color: ${scoreColor}`}>
-            <svg width="160" height="160" viewBox="0 0 160 160">
+            <svg width="120" height="120" viewBox="0 0 120 120">
               <circle
-                cx="80"
-                cy="80"
-                r="70"
+                cx="60"
+                cy="60"
+                r="52"
                 fill="none"
-                stroke="#E2E8F0"
-                stroke-width="12"
+                stroke="#e5e5e5"
+                stroke-width="8"
               />
               <circle
-                cx="80"
-                cy="80"
-                r="70"
+                cx="60"
+                cy="60"
+                r="52"
                 fill="none"
                 stroke={scoreColor}
-                stroke-width="12"
+                stroke-width="8"
                 stroke-linecap="round"
-                stroke-dasharray={`${(totalScore / 100) * 439.8} 439.8`}
-                transform="rotate(-90 80 80)"
+                stroke-dasharray={`${(totalScore / 100) * 326.7} 326.7`}
+                transform="rotate(-90 60 60)"
               />
             </svg>
             <div class="total-score-text">
@@ -232,136 +211,70 @@ const keywords = review.data.keywords || `${review.data.product.brand} ${review.
     </article>
   </main>
 
-  <!-- Footer -->
   <footer class="footer">
-    <div class="footer-content">
-      <div class="footer-logo">
-        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-          </svg>
-        </div>
-        <div>
-          <p class="font-bold text-brand-text">TechPulse</p>
-          <p class="text-small text-brand-text-secondary">기술의 맥박</p>
-        </div>
-      </div>
-      <p class="footer-text">
-        © 2024 TechPulse. All rights reserved.<br />
-        솔직한 리뷰로 현명한 선택을 돕습니다.
-      </p>
-    </div>
+    <p>&copy; 2024 TechPulse. All rights reserved.</p>
   </footer>
 </BaseLayout>
 
 <style>
   main {
-    max-width: 900px;
+    max-width: 800px;
     margin: 0 auto;
-  }
-
-  /* Breadcrumb */
-  .breadcrumb {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 32px;
-    font-size: 14px;
-  }
-
-  .breadcrumb-link {
-    color: var(--brand-text-secondary);
-    transition: color 0.2s ease;
-  }
-
-  .breadcrumb-link:hover {
-    color: var(--brand-primary);
-  }
-
-  .breadcrumb-separator {
-    color: var(--brand-text-secondary);
-  }
-
-  .breadcrumb-current {
-    color: var(--brand-text);
-    font-weight: 600;
+    padding: 0 40px;
   }
 
   /* Product Header */
   .product-header {
     margin-bottom: 48px;
-    text-align: center;
+    padding-top: 48px;
   }
 
-  .product-meta {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
-  .category-badge {
+  .back-link {
     display: inline-block;
-    padding: 6px 16px;
-    background: var(--brand-primary);
-    color: white;
-    font-size: 13px;
-    font-weight: 700;
-    border-radius: 20px;
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 32px;
+    transition: color 0.15s ease;
   }
 
-  .rank-badge {
-    display: inline-block;
-    padding: 6px 16px;
-    background: linear-gradient(135deg, var(--brand-secondary) 0%, var(--brand-primary) 100%);
-    color: white;
-    font-size: 13px;
-    font-weight: 700;
-    border-radius: 20px;
-    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+  .back-link:hover {
+    color: #000;
   }
 
   .product-title {
-    font-size: 36px;
-    font-weight: 900;
-    color: var(--brand-text);
-    margin-bottom: 12px;
-    line-height: 1.2;
-  }
-
-  .product-brand {
-    font-size: 20px;
-    color: var(--brand-text-secondary);
-    font-weight: 600;
+    font-size: 40px;
+    font-weight: 700;
+    color: #000;
     margin-bottom: 16px;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
   }
 
   .article-info {
     display: flex;
-    justify-content: center;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     font-size: 14px;
-    color: var(--brand-text-secondary);
+    color: #888;
   }
 
-  .updated-date {
-    color: var(--brand-accent);
+  .separator {
+    color: #ccc;
+  }
+
+  .brand {
     font-weight: 500;
-  }
-
-  .author {
-    font-weight: 600;
   }
 
   /* Score Summary */
   .score-summary {
     display: grid;
-    grid-template-columns: 200px 1fr;
+    grid-template-columns: 160px 1fr;
     gap: 32px;
     padding: 32px;
-    background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%);
-    border-radius: 16px;
+    background: #fafafa;
+    border-radius: 12px;
+    border: 1px solid #eee;
     margin-bottom: 48px;
   }
 
@@ -373,8 +286,8 @@ const keywords = review.data.keywords || `${review.data.product.brand} ${review.
 
   .total-score-circle {
     position: relative;
-    width: 160px;
-    height: 160px;
+    width: 120px;
+    height: 120px;
   }
 
   .total-score-text {
@@ -387,8 +300,8 @@ const keywords = review.data.keywords || `${review.data.product.brand} ${review.
 
   .score-number {
     display: block;
-    font-size: 48px;
-    font-weight: 900;
+    font-size: 36px;
+    font-weight: 700;
     color: var(--score-color);
     line-height: 1;
     margin-bottom: 4px;
@@ -396,104 +309,85 @@ const keywords = review.data.keywords || `${review.data.product.brand} ${review.
 
   .score-label {
     display: block;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--brand-text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    color: #888;
   }
 
   .individual-scores {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
   }
 
   .score-item {
     display: grid;
-    grid-template-columns: 80px 1fr 40px;
+    grid-template-columns: 80px 1fr 36px;
     align-items: center;
     gap: 12px;
   }
 
   .score-name {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--brand-text);
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
   }
 
   .score-bar {
-    height: 12px;
-    background: #E2E8F0;
-    border-radius: 6px;
+    height: 8px;
+    background: #e5e5e5;
+    border-radius: 4px;
     overflow: hidden;
   }
 
   .score-bar-fill {
     height: 100%;
-    border-radius: 6px;
+    border-radius: 4px;
     transition: width 1s ease;
   }
 
   .score-value {
-    font-size: 16px;
-    font-weight: 800;
-    color: var(--brand-text);
+    font-size: 14px;
+    font-weight: 700;
+    color: #000;
     text-align: right;
+    font-variant-numeric: tabular-nums;
   }
 
-  /* Prose (Markdown Content) */
+  /* Prose */
   .prose {
     margin-bottom: 48px;
   }
 
   /* Footer */
   .footer {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 40px;
+    border-top: 1px solid #e5e5e5;
     margin-top: 80px;
-    padding: 32px 0;
-    border-top: 2px solid var(--brand-border);
   }
 
-  .footer-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    text-align: center;
+  .footer p {
+    font-size: 13px;
+    color: #999;
   }
 
-  .footer-logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .footer-text {
-    font-size: 14px;
-    color: var(--brand-text-secondary);
-    line-height: 1.6;
-  }
-
-  /* 반응형 */
+  /* Responsive */
   @media (max-width: 768px) {
     main {
-      padding: 0 16px;
+      padding: 0 20px;
     }
 
-    .breadcrumb {
-      flex-wrap: wrap;
-      font-size: 12px;
+    .product-header {
+      padding-top: 32px;
     }
 
     .product-title {
       font-size: 28px;
     }
 
-    .product-brand {
-      font-size: 18px;
-    }
-
     .article-info {
-      flex-direction: column;
-      gap: 4px;
       font-size: 12px;
     }
 
@@ -504,25 +398,22 @@ const keywords = review.data.keywords || `${review.data.product.brand} ${review.
     }
 
     .total-score-circle {
-      width: 140px;
-      height: 140px;
+      width: 100px;
+      height: 100px;
     }
 
     .score-number {
-      font-size: 40px;
+      font-size: 28px;
     }
 
     .score-item {
-      grid-template-columns: 70px 1fr 35px;
+      grid-template-columns: 70px 1fr 32px;
       gap: 8px;
     }
 
-    .score-name {
-      font-size: 13px;
-    }
-
-    .score-value {
-      font-size: 14px;
+    .footer {
+      padding: 32px 20px;
+      margin-top: 48px;
     }
   }
 </style>
