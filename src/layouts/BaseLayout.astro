@@ -115,7 +115,7 @@ const organizationSchema = {
     <!-- Import Global Styles -->
     <link rel="stylesheet" href="/src/styles/global.css" />
   </head>
-  <body class="mx-auto max-w-container bg-brand-bg px-5 py-12 text-brand-text font-sans antialiased">
+  <body class="bg-white text-brand-text font-sans antialiased">
     <slot />
 
     <!-- Google Analytics (Lazy Load) -->
@@ -135,12 +135,7 @@ const organizationSchema = {
   @import 'tailwindcss';
 
   :root {
-    --brand-primary: #2563EB;
-    --brand-secondary: #7C3AED;
-    --brand-accent: #10B981;
     --brand-text: #0F172A;
-    --brand-bg: #FFFFFF;
-    --brand-border: #E2E8F0;
   }
 
   * {
@@ -160,73 +155,14 @@ const organizationSchema = {
     font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    line-height: 1.6;
+    line-height: 1.5;
     word-break: keep-all;
+    color: #000;
+    background: #fff;
   }
 
   a {
     color: inherit;
     text-decoration: none;
-    transition: color 0.2s ease;
-  }
-
-  /* 유틸리티 클래스 */
-  .card {
-    border: 1px solid var(--brand-border);
-    border-radius: 12px;
-    padding: 1.5rem;
-    background: white;
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    transition: box-shadow 0.2s ease;
-  }
-
-  .card:hover {
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  }
-
-  .badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .badge-primary {
-    background: var(--brand-primary);
-    color: white;
-  }
-
-  .badge-success {
-    background: var(--brand-accent);
-    color: white;
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    cursor: pointer;
-  }
-
-  .btn-primary {
-    background: var(--brand-primary);
-    color: white;
-  }
-
-  .btn-primary:hover {
-    background: #1d4ed8;
-  }
-
-  .btn-outline {
-    border: 1px solid var(--brand-border);
-  }
-
-  .btn-outline:hover {
-    background: #F8FAFC;
   }
 </style>

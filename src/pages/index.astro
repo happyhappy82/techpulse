@@ -1,442 +1,269 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
-import ProductCard from '../components/ProductCard.astro';
 import { getCollection } from 'astro:content';
 
-// 모든 리뷰 가져오기
 const allReviews = await getCollection('reviews');
 
-// featured 제품들 (최신순)
-const featuredReviews = allReviews
-  .filter(review => review.data.featured)
-  .sort((a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime());
+// 최신순 정렬
+const sortedReviews = allReviews.sort(
+  (a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime()
+);
 
-// 카테고리별 최신 리뷰
-const laptopReviews = allReviews
-  .filter(review => review.data.product.category === 'laptop')
-  .sort((a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime())
-  .slice(0, 3);
+// 카테고리 한글 매핑
+const categoryMap: Record<string, string> = {
+  laptop: 'Laptop',
+  smartphone: 'Phone',
+  gadget: 'Gadget',
+};
 
-const smartphoneReviews = allReviews
-  .filter(review => review.data.product.category === 'smartphone')
-  .sort((a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime())
-  .slice(0, 3);
+// 날짜 포맷
+function formatDate(dateStr: string) {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
 
-const gadgetReviews = allReviews
-  .filter(review => review.data.product.category === 'gadget')
-  .sort((a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime())
-  .slice(0, 3);
-
-// 총 점수 계산 함수
+// 총 점수 계산
 function calculateTotalScore(scores: any) {
   const { performance, design, display, battery, value } = scores;
-  // display가 0이면 (이어폰 등) 제외하고 평균 계산
   if (display === 0) {
     return Math.round((performance + design + battery + value) / 4);
   }
   return Math.round((performance + design + display + battery + value) / 5);
 }
 
-// 메타 정보
-const title = 'TechPulse - 기술의 맥박을 느끼다';
+const title = 'TechPulse - Blog';
 const description = '최신 전자제품 리뷰와 비교 분석. 노트북, 스마트폰, 가젯의 솔직한 평가와 최저가 정보를 제공합니다.';
 ---
 
 <BaseLayout title={title} description={description}>
   <Header />
 
-  <main>
-    <!-- Hero Section -->
-    <section class="hero-section">
-      <div class="hero-content">
-        <h1 class="hero-title">
-          <span class="hero-title-main">기술의 맥박을 느끼다</span>
-          <span class="hero-title-sub">TechPulse</span>
-        </h1>
-        <p class="hero-description">
-          최신 전자제품의 솔직한 리뷰와 상세한 비교 분석.<br />
-          당신의 현명한 선택을 위한 가장 정확한 정보를 제공합니다.
-        </p>
-        <div class="hero-stats">
-          <div class="stat-item">
-            <span class="stat-number">{allReviews.length}+</span>
-            <span class="stat-label">리뷰</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-number">100%</span>
-            <span class="stat-label">솔직한 평가</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-number">24시간</span>
-            <span class="stat-label">최신 정보</span>
-          </div>
-        </div>
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">Blog</h1>
+    </div>
+
+    <div class="post-list">
+      <div class="post-list-header">
+        <span class="col-date">Date</span>
+        <span class="col-title">Title</span>
+        <span class="col-category">Category</span>
+        <span class="col-score">Score</span>
       </div>
-    </section>
 
-    <!-- Featured Products -->
-    {featuredReviews.length > 0 && (
-      <section class="section">
-        <div class="section-header">
-          <h2 class="section-title">🔥 추천 제품</h2>
-          <p class="section-description">전문가가 선정한 이달의 베스트 제품</p>
-        </div>
-        <div class="products-grid">
-          {featuredReviews.map((review) => (
-            <ProductCard
-              slug={review.slug}
-              title={review.data.title}
-              productName={review.data.product.name}
-              brand={review.data.product.brand}
-              image={review.data.product.image}
-              totalScore={calculateTotalScore(review.data.scores)}
-              scores={review.data.scores}
-              rank={review.data.rank}
-              prices={review.data.prices}
-            />
-          ))}
-        </div>
-      </section>
-    )}
-
-    <!-- Laptops -->
-    {laptopReviews.length > 0 && (
-      <section class="section">
-        <div class="section-header">
-          <div>
-            <h2 class="section-title">💻 노트북</h2>
-            <p class="section-description">생산성을 높이는 완벽한 노트북 찾기</p>
-          </div>
-          <a href="/laptops" class="section-link">
-            전체 보기
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </a>
-        </div>
-        <div class="products-grid">
-          {laptopReviews.map((review) => (
-            <ProductCard
-              slug={review.slug}
-              title={review.data.title}
-              productName={review.data.product.name}
-              brand={review.data.product.brand}
-              image={review.data.product.image}
-              totalScore={calculateTotalScore(review.data.scores)}
-              scores={review.data.scores}
-              rank={review.data.rank}
-              prices={review.data.prices}
-            />
-          ))}
-        </div>
-      </section>
-    )}
-
-    <!-- Smartphones -->
-    {smartphoneReviews.length > 0 && (
-      <section class="section">
-        <div class="section-header">
-          <div>
-            <h2 class="section-title">📱 스마트폰</h2>
-            <p class="section-description">최신 기술이 담긴 스마트폰 리뷰</p>
-          </div>
-          <a href="/smartphones" class="section-link">
-            전체 보기
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </a>
-        </div>
-        <div class="products-grid">
-          {smartphoneReviews.map((review) => (
-            <ProductCard
-              slug={review.slug}
-              title={review.data.title}
-              productName={review.data.product.name}
-              brand={review.data.product.brand}
-              image={review.data.product.image}
-              totalScore={calculateTotalScore(review.data.scores)}
-              scores={review.data.scores}
-              rank={review.data.rank}
-              prices={review.data.prices}
-            />
-          ))}
-        </div>
-      </section>
-    )}
-
-    <!-- Gadgets -->
-    {gadgetReviews.length > 0 && (
-      <section class="section">
-        <div class="section-header">
-          <div>
-            <h2 class="section-title">⚡ 가젯</h2>
-            <p class="section-description">일상을 풍요롭게 하는 스마트 가젯</p>
-          </div>
-          <a href="/gadgets" class="section-link">
-            전체 보기
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </a>
-        </div>
-        <div class="products-grid">
-          {gadgetReviews.map((review) => (
-            <ProductCard
-              slug={review.slug}
-              title={review.data.title}
-              productName={review.data.product.name}
-              brand={review.data.product.brand}
-              image={review.data.product.image}
-              totalScore={calculateTotalScore(review.data.scores)}
-              scores={review.data.scores}
-              rank={review.data.rank}
-              prices={review.data.prices}
-            />
-          ))}
-        </div>
-      </section>
-    )}
+      {sortedReviews.map((review) => (
+        <a href={`/reviews/${review.slug}`} class="post-row">
+          <span class="col-date">
+            <time datetime={review.data.publishedAt}>
+              {formatDate(review.data.publishedAt)}
+            </time>
+          </span>
+          <span class="col-title">
+            <span class="post-name">{review.data.product.name}</span>
+            <span class="post-desc">{review.data.description}</span>
+          </span>
+          <span class="col-category">
+            <span class="category-tag">{categoryMap[review.data.product.category]}</span>
+          </span>
+          <span class="col-score">
+            <span class="score-value">{calculateTotalScore(review.data.scores)}</span>
+          </span>
+        </a>
+      ))}
+    </div>
   </main>
 
-  <!-- Footer -->
   <footer class="footer">
-    <div class="footer-content">
-      <div class="footer-logo">
-        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-          </svg>
-        </div>
-        <div>
-          <p class="font-bold text-brand-text">TechPulse</p>
-          <p class="text-small text-brand-text-secondary">기술의 맥박</p>
-        </div>
-      </div>
-      <p class="footer-text">
-        © 2024 TechPulse. All rights reserved.<br />
-        솔직한 리뷰로 현명한 선택을 돕습니다.
-      </p>
-    </div>
+    <p>&copy; 2024 TechPulse. All rights reserved.</p>
   </footer>
 </BaseLayout>
 
 <style>
-  main {
-    min-height: 60vh;
-  }
-
-  /* Hero Section */
-  .hero-section {
-    margin-bottom: 64px;
-    padding: 48px 0;
-    background: linear-gradient(135deg, #EFF6FF 0%, #F3E8FF 100%);
-    border-radius: 16px;
-    text-align: center;
-  }
-
-  .hero-content {
-    max-width: 800px;
+  .main-content {
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 40px;
+    min-height: calc(100vh - 200px);
   }
 
-  .hero-title {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 20px;
+  .page-header {
+    padding: 80px 0 48px;
   }
 
-  .hero-title-main {
-    font-size: 32px;
-    font-weight: 800;
-    color: var(--brand-text);
-    line-height: 1.2;
-  }
-
-  .hero-title-sub {
+  .page-title {
     font-size: 48px;
-    font-weight: 900;
-    background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1.1;
+    font-weight: 700;
+    color: #000;
+    letter-spacing: -0.03em;
   }
 
-  .hero-description {
-    font-size: 18px;
-    color: var(--brand-text-secondary);
-    margin-bottom: 32px;
-    line-height: 1.6;
+  /* Post List Table */
+  .post-list {
+    width: 100%;
   }
 
-  .hero-stats {
-    display: flex;
-    justify-content: center;
+  .post-list-header {
+    display: grid;
+    grid-template-columns: 140px 1fr 100px 60px;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e5e5;
+    font-size: 12px;
+    font-weight: 500;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .post-row {
+    display: grid;
+    grid-template-columns: 140px 1fr 100px 60px;
+    gap: 16px;
+    padding: 20px 0;
+    border-bottom: 1px solid #f0f0f0;
     align-items: center;
-    gap: 24px;
+    transition: background 0.15s ease;
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
   }
 
-  .stat-item {
+  .post-row:hover {
+    background: #fafafa;
+  }
+
+  .col-date {
+    font-size: 14px;
+    color: #888;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .col-title {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    min-width: 0;
   }
 
-  .stat-number {
-    font-size: 28px;
-    font-weight: 800;
-    color: var(--brand-primary);
-  }
-
-  .stat-label {
-    font-size: 14px;
-    color: var(--brand-text-secondary);
-    font-weight: 500;
-  }
-
-  .stat-divider {
-    width: 1px;
-    height: 40px;
-    background: var(--brand-border);
-  }
-
-  /* Section */
-  .section {
-    margin-bottom: 64px;
-  }
-
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 24px;
-  }
-
-  .section-title {
-    font-size: 28px;
-    font-weight: 800;
-    color: var(--brand-text);
-    margin-bottom: 4px;
-  }
-
-  .section-description {
+  .post-name {
     font-size: 16px;
-    color: var(--brand-text-secondary);
+    font-weight: 600;
+    color: #000;
+    letter-spacing: -0.01em;
   }
 
-  .section-link {
+  .post-desc {
+    font-size: 14px;
+    color: #666;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .col-category {
     display: flex;
     align-items: center;
-    gap: 4px;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--brand-primary);
-    transition: all 0.2s ease;
   }
 
-  .section-link:hover {
-    gap: 8px;
-    color: var(--brand-secondary);
+  .category-tag {
+    font-size: 12px;
+    font-weight: 500;
+    color: #666;
+    background: #f5f5f5;
+    padding: 4px 10px;
+    border-radius: 100px;
+    border: 1px solid #e5e5e5;
   }
 
-  /* Products Grid */
-  .products-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 24px;
+  .col-score {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .score-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #000;
+    font-variant-numeric: tabular-nums;
   }
 
   /* Footer */
   .footer {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 40px;
+    border-top: 1px solid #e5e5e5;
     margin-top: 80px;
-    padding: 32px 0;
-    border-top: 2px solid var(--brand-border);
   }
 
-  .footer-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    text-align: center;
+  .footer p {
+    font-size: 13px;
+    color: #999;
   }
 
-  .footer-logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .footer-text {
-    font-size: 14px;
-    color: var(--brand-text-secondary);
-    line-height: 1.6;
-  }
-
-  /* 반응형 */
+  /* Responsive */
   @media (max-width: 768px) {
-    .hero-section {
-      padding: 32px 0;
-      margin-bottom: 48px;
+    .main-content {
+      padding: 0 20px;
     }
 
-    .hero-title-main {
-      font-size: 24px;
+    .page-header {
+      padding: 48px 0 32px;
     }
 
-    .hero-title-sub {
-      font-size: 36px;
+    .page-title {
+      font-size: 32px;
     }
 
-    .hero-description {
-      font-size: 16px;
+    .post-list-header {
+      display: none;
     }
 
-    .hero-stats {
-      gap: 16px;
-    }
-
-    .stat-number {
-      font-size: 24px;
-    }
-
-    .stat-label {
-      font-size: 12px;
-    }
-
-    .section {
-      margin-bottom: 48px;
-    }
-
-    .section-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
-    }
-
-    .section-title {
-      font-size: 24px;
-    }
-
-    .section-description {
-      font-size: 14px;
-    }
-
-    .products-grid {
+    .post-row {
       grid-template-columns: 1fr;
-      gap: 16px;
+      gap: 8px;
+      padding: 16px;
+      margin: 0 -16px;
     }
-  }
 
-  @media (min-width: 769px) and (max-width: 1024px) {
-    .products-grid {
-      grid-template-columns: repeat(2, 1fr);
+    .col-date {
+      font-size: 12px;
+      order: 1;
+    }
+
+    .col-title {
+      order: 2;
+    }
+
+    .col-category {
+      order: 3;
+    }
+
+    .col-score {
+      order: 0;
+      justify-content: flex-start;
+    }
+
+    .score-value {
+      font-size: 13px;
+      background: #000;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .footer {
+      padding: 32px 20px;
+      margin-top: 48px;
     }
   }
 </style>
