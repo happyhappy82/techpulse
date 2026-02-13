@@ -96,10 +96,11 @@ async function syncPage(pageId, existingMap) {
   const title = page.properties.Title?.title?.[0]?.plain_text || '제목 없음';
   const date = page.properties.Date?.date?.start || new Date().toISOString().split('T')[0];
 
-  // ▶ 미래 날짜면 스킵 (예약 발행)
-  const today = new Date().toISOString().split('T')[0];
-  if (date > today) {
-    console.log(`   ⏭️  스킵: 예약 발행 (${date} > 오늘 ${today})`);
+  // ▶ 미래 시간이면 스킵 (예약 발행 - 시간 단위까지 비교)
+  const now = new Date();
+  const publishDate = new Date(date);
+  if (publishDate > now) {
+    console.log(`   ⏭️  스킵: 예약 발행 (${date} > 현재 ${now.toISOString()})`);
     return { action: 'skipped' };
   }
 
