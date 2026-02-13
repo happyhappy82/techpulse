@@ -359,6 +359,158 @@ const keywords = review.data.keywords || `${review.data.product.brand} ${review.
     margin-bottom: 48px;
   }
 
+  .prose :global(h2) {
+    font-size: 24px;
+    font-weight: 700;
+    color: #000;
+    margin: 48px 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e5e5;
+    letter-spacing: -0.02em;
+  }
+
+  .prose :global(h3) {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111;
+    margin: 32px 0 12px;
+  }
+
+  .prose :global(p) {
+    font-size: 16px;
+    line-height: 1.85;
+    color: #333;
+    margin-bottom: 20px;
+    word-break: keep-all;
+  }
+
+  .prose :global(a) {
+    color: #2563eb;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .prose :global(a:hover) {
+    color: #1d4ed8;
+  }
+
+  .prose :global(strong) {
+    font-weight: 600;
+    color: #000;
+  }
+
+  .prose :global(ul) {
+    margin: 16px 0 24px;
+    padding-left: 24px;
+    list-style-type: disc;
+  }
+
+  .prose :global(ol) {
+    margin: 16px 0 24px;
+    padding-left: 24px;
+    list-style-type: decimal;
+  }
+
+  .prose :global(li) {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #333;
+    margin-bottom: 6px;
+  }
+
+  .prose :global(li::marker) {
+    color: #999;
+  }
+
+  .prose :global(blockquote) {
+    border-left: 3px solid #e5e5e5;
+    padding-left: 16px;
+    margin: 24px 0;
+    color: #666;
+    font-style: italic;
+  }
+
+  .prose :global(hr) {
+    border: none;
+    border-top: 1px solid #e5e5e5;
+    margin: 40px 0;
+  }
+
+  /* 표 스타일 */
+  .prose :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0 28px;
+    font-size: 14px;
+  }
+
+  .prose :global(thead) {
+    background: #f8f8f8;
+  }
+
+  .prose :global(th) {
+    padding: 12px 16px;
+    font-weight: 600;
+    color: #111;
+    text-align: left;
+    border-bottom: 2px solid #e0e0e0;
+    white-space: nowrap;
+  }
+
+  .prose :global(td) {
+    padding: 11px 16px;
+    color: #333;
+    border-bottom: 1px solid #f0f0f0;
+    line-height: 1.6;
+  }
+
+  .prose :global(tbody tr:hover) {
+    background: #fafafa;
+  }
+
+  .prose :global(code) {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    font-size: 14px;
+    background: #f5f5f5;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #e11d48;
+  }
+
+  .prose :global(pre) {
+    background: #1a1a1a;
+    color: #e5e5e5;
+    padding: 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 24px 0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .prose :global(pre code) {
+    background: none;
+    padding: 0;
+    color: inherit;
+  }
+
+  .prose :global(figure) {
+    margin: 32px 0;
+  }
+
+  .prose :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  .prose :global(figcaption) {
+    font-size: 13px;
+    color: #888;
+    text-align: center;
+    margin-top: 8px;
+  }
+
   /* Footer */
   .footer {
     max-width: 800px;
