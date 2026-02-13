@@ -7,7 +7,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // TechPulse 브랜드 컬러 시스템
+        // Tech Price Guide 브랜드 컬러 시스템
         brand: {
           primary: "#2563EB", // 메인 블루
           secondary: "#7C3AED", // 세컨더리 퍼플
@@ -40,7 +40,7 @@ const config: Config = {
         ],
       },
       fontSize: {
-        // TechPulse 타이포그래피
+        // Tech Price Guide 타이포그래피
         "display": ["32px", { lineHeight: "1.2", fontWeight: "800" }],
         "title": ["24px", { lineHeight: "1.3", fontWeight: "700" }],
         "subtitle": ["18px", { lineHeight: "1.4", fontWeight: "600" }],

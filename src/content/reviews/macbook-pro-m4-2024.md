@@ -3,7 +3,7 @@ title: "2024 맥북 프로 M4 리뷰 5가지 핵심 포인트(구매 전 꼭 읽
 description: "맥북 프로 M4 2024의 성능, 디스플레이, 배터리, 포트, 가성비까지 5가지 핵심 포인트를 정리했습니다. 직접 한 달간 사용한 솔직 리뷰"
 publishedAt: "2024-11-15"
 updatedAt: "2024-11-20"
-author: "TechPulse"
+author: "Tech Price Guide"
 
 product:
   name: "MacBook Pro M4 16형 2024"

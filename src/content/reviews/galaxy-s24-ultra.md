@@ -3,7 +3,7 @@ title: "2024 갤럭시 S24 울트라 리뷰 6가지 핵심 포인트(AI 스마�
 description: "갤럭시 S24 울트라의 Galaxy AI, 카메라, 디스플레이, S펜, 배터리, 가성비까지 6가지 핵심 포인트를 정리했습니다. 직접 두 달간 사용한 솔직 리뷰"
 publishedAt: "2024-02-10"
 updatedAt: "2024-02-20"
-author: "TechPulse"
+author: "Tech Price Guide"
 
 product:
   name: "Galaxy S24 Ultra"

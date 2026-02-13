@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://www.techpulse.reviews',
+  site: 'https://www.techpriceguide.xyz',
   integrations: [sitemap()],
   vite: {
     plugins: [tailwindcss()],

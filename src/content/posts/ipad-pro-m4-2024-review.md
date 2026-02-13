@@ -2,7 +2,7 @@
 title: "2024 아이패드 프로 M4 리뷰 3가지 핵심 포인트(구매 전 꼭 읽으세요)"
 description: "아이패드 프로 M4는 역대 가장 얇고 강력한 태블릿입니다. M4 칩, OLED 디스플레이, Apple Pencil Pro까지 핵심 포인트를 정리했습니다."
 publishedAt: "2026-02-13"
-author: "TechPulse"
+author: "Tech Price Guide"
 tags: []
 notionPageId: "306753eb-c013-813e-a71f-e212b98f88bb"
 ---

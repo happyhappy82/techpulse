@@ -2,7 +2,7 @@
 title: "2024 소니 WH-1000XM5 헤드폰 리뷰 3가지 핵심 포인트(노이즈캔슬링 끝판왕)"
 description: "소니 WH-1000XM5는 업계 최고 수준의 노이즈캔슬링과 30시간 배터리를 갖춘 프리미엄 헤드폰입니다."
 publishedAt: "2026-02-13"
-author: "TechPulse"
+author: "Tech Price Guide"
 tags: []
 notionPageId: "306753eb-c013-8171-bdce-f623bb979b28"
 ---

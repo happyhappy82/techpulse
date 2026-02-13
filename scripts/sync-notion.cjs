@@ -1,5 +1,5 @@
 /**
- * TechPulse - Notion → Markdown 자동 변환 스크립트
+ * Tech Price Guide - Notion → Markdown 자동 변환 스크립트
  * 노파싱 방식: notion-to-md로 자동 변환
  *
  * 환경변수:
@@ -144,7 +144,7 @@ async function syncPage(pageId, existingMap) {
 title: "${title.replace(/"/g, '\\"')}"
 description: "${autoExcerpt.replace(/"/g, '\\"')}"
 publishedAt: "${dateFormatted}"
-author: "TechPulse"
+author: "Tech Price Guide"
 tags: [${tags.map(t => `"${t}"`).join(', ')}]
 notionPageId: "${pageId}"
 ---`;

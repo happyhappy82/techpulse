@@ -8,7 +8,7 @@ const reviewsCollection = defineCollection({
     description: z.string(),
     publishedAt: z.string(),
     updatedAt: z.string().optional(),
-    author: z.string().default('TechPulse'),
+    author: z.string().default('Tech Price Guide'),
 
     // 제품 정보
     product: z.object({
@@ -64,7 +64,7 @@ const postsCollection = defineCollection({
     title: z.string(),
     description: z.string(),
     publishedAt: z.string(),
-    author: z.string().default('TechPulse'),
+    author: z.string().default('Tech Price Guide'),
     tags: z.array(z.string()).default([]),
     notionPageId: z.string().optional(),
   }),

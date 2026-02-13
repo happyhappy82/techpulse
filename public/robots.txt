@@ -3,8 +3,8 @@ User-agent: *
 Allow: /
 
 # Sitemaps
-Sitemap: https://www.techpulse.reviews/sitemap-index.xml
-Sitemap: https://www.techpulse.reviews/sitemap-0.xml
+Sitemap: https://www.techpriceguide.xyz/sitemap-index.xml
+Sitemap: https://www.techpriceguide.xyz/sitemap-0.xml
 
 # Crawl-delay for all bots (optional, helps prevent server overload)
 Crawl-delay: 1
