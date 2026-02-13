@@ -94,14 +94,21 @@ async function syncPage(pageId, existingMap) {
 
   // ▶ 페이지 속성 추출
   const title = page.properties.Title?.title?.[0]?.plain_text || '제목 없음';
-  const date = page.properties.Date?.date?.start || new Date().toISOString().split('T')[0];
+  const isWebhook = !!SYNC_PAGE_ID || TRIGGER_TYPE === 'repository_dispatch';
+  const date = page.properties.Date?.date?.start || (isWebhook ? new Date().toISOString() : null);
 
-  // ▶ 미래 시간이면 스킵 (예약 발행 - 시간 단위까지 비교)
-  const now = new Date();
-  const publishDate = new Date(date);
-  if (publishDate > now) {
-    console.log(`   ⏭️  스킵: 예약 발행 (${date} > 현재 ${now.toISOString()})`);
-    return { action: 'skipped' };
+  // ▶ 웹훅이 아닌 경우: 날짜 없으면 스킵, 미래 시간이면 스킵
+  if (!isWebhook) {
+    if (!date) {
+      console.log(`   ⏭️  스킵: 날짜 미설정 (예약 발행 시 날짜 필수)`);
+      return { action: 'skipped' };
+    }
+    const now = new Date();
+    const publishDate = new Date(date);
+    if (publishDate > now) {
+      console.log(`   ⏭️  스킵: 예약 발행 (${date} > 현재 ${now.toISOString()})`);
+      return { action: 'skipped' };
+    }
   }
 
   const excerpt = page.properties.Excerpt?.rich_text?.[0]?.plain_text || '';
@@ -130,7 +137,7 @@ async function syncPage(pageId, existingMap) {
   console.log(`   마크다운 길이: ${markdownContent.length}자`);
 
   // ▶ frontmatter 생성
-  const dateFormatted = date.split('T')[0];
+  const dateFormatted = (date || new Date().toISOString()).split('T')[0];
   const autoExcerpt = excerpt || markdownContent.substring(0, 150).replace(/[#*\n]/g, '').trim() + '...';
 
   const frontmatter = `---
