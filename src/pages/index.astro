@@ -96,24 +96,30 @@ const description = '최신 전자제품 리뷰와 비교 분석. 노트북, 스
         <span class="col-category">Tag</span>
       </div>
 
-      {allPosts.map((post) => (
-        <a href={post.href} class="post-row">
-          <span class="col-date">
-            <time datetime={post.date}>
-              {formatDate(post.date)}
-            </time>
-          </span>
-          <span class="col-title">
-            <span class="post-name">{post.title}</span>
-            {post.description && <span class="post-desc">{post.description}</span>}
-          </span>
-          <span class="col-category">
-            {getTagDisplay(post.tags) && (
-              <span class="category-tag">{getTagDisplay(post.tags)}</span>
-            )}
-          </span>
-        </a>
-      ))}
+      {allPosts.length > 0 ? (
+        allPosts.map((post) => (
+          <a href={post.href} class="post-row">
+            <span class="col-date">
+              <time datetime={post.date}>
+                {formatDate(post.date)}
+              </time>
+            </span>
+            <span class="col-title">
+              <span class="post-name">{post.title}</span>
+              {post.description && <span class="post-desc">{post.description}</span>}
+            </span>
+            <span class="col-category">
+              {getTagDisplay(post.tags) && (
+                <span class="category-tag">{getTagDisplay(post.tags)}</span>
+              )}
+            </span>
+          </a>
+        ))
+      ) : (
+        <div class="empty-state">
+          <p>Coming soon.</p>
+        </div>
+      )}
     </div>
   </main>
 
@@ -220,6 +226,17 @@ const description = '최신 전자제품 리뷰와 비교 분석. 노트북, 스
     padding: 4px 10px;
     border-radius: 100px;
     border: 1px solid #e5e5e5;
+  }
+
+  /* Empty State */
+  .empty-state {
+    padding: 80px 0;
+    text-align: center;
+  }
+
+  .empty-state p {
+    font-size: 16px;
+    color: #999;
   }
 
   /* Footer */
