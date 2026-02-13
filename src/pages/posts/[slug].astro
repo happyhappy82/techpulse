@@ -1,32 +1,19 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
-import { getAllPosts, getPostBySlug, getPageBlocks, blocksToHtml } from '../../lib/notion';
+import { getCollection } from 'astro:content';
 
-// Static paths 생성
+// Static paths 생성 - Content Collection 기반
 export async function getStaticPaths() {
-  try {
-    const posts = await getAllPosts();
-    return posts
-      .filter((post) => post.slug)
-      .map((post) => ({
-        params: { slug: post.slug },
-      }));
-  } catch (e) {
-    console.warn('Notion fetch failed in getStaticPaths:', e);
-    return [];
-  }
+  const posts = await getCollection('posts');
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
 }
 
-const { slug } = Astro.params;
-const post = await getPostBySlug(slug!);
-
-if (!post) {
-  return Astro.redirect('/404');
-}
-
-const blocks = await getPageBlocks(post.id);
-const contentHtml = blocksToHtml(blocks);
+const { post } = Astro.props;
+const { Content } = await post.render();
 
 // 날짜 포맷팅
 function formatDate(dateString: string): string {
@@ -38,15 +25,15 @@ function formatDate(dateString: string): string {
   });
 }
 
-const title = post.title;
-const description = post.excerpt || post.title;
+const title = post.data.title;
+const description = post.data.description;
 ---
 
 <BaseLayout
   title={title}
   description={description}
   ogType="article"
-  publishedTime={post.date}
+  publishedTime={post.data.publishedAt}
 >
   <Header />
 
@@ -54,18 +41,18 @@ const description = post.excerpt || post.title;
     <article class="post-article">
       <header class="post-header">
         <a href="/" class="back-link">&larr; Back</a>
-        <h1 class="post-title">{post.title}</h1>
+        <h1 class="post-title">{post.data.title}</h1>
         <div class="article-info">
-          {post.date && (
-            <time datetime={post.date}>
-              {formatDate(post.date)}
+          {post.data.publishedAt && (
+            <time datetime={post.data.publishedAt}>
+              {formatDate(post.data.publishedAt)}
             </time>
           )}
-          {post.tags.length > 0 && (
+          {post.data.tags.length > 0 && (
             <>
               <span class="separator">&middot;</span>
               <div class="tags">
-                {post.tags.map((tag) => (
+                {post.data.tags.map((tag) => (
                   <span class="tag">{tag}</span>
                 ))}
               </div>
@@ -74,7 +61,9 @@ const description = post.excerpt || post.title;
         </div>
       </header>
 
-      <div class="prose" set:html={contentHtml} />
+      <div class="prose">
+        <Content />
+      </div>
     </article>
   </main>
 
@@ -199,6 +188,14 @@ const description = post.excerpt || post.title;
     padding-left: 24px;
   }
 
+  .prose :global(ul) {
+    list-style-type: disc;
+  }
+
+  .prose :global(ol) {
+    list-style-type: decimal;
+  }
+
   .prose :global(li) {
     font-size: 16px;
     line-height: 1.8;
@@ -242,6 +239,37 @@ const description = post.excerpt || post.title;
     border: none;
     border-top: 1px solid #e5e5e5;
     margin: 40px 0;
+  }
+
+  .prose :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0 28px;
+    font-size: 14px;
+  }
+
+  .prose :global(thead) {
+    background: #f8f8f8;
+  }
+
+  .prose :global(th) {
+    padding: 12px 16px;
+    font-weight: 600;
+    color: #111;
+    text-align: left;
+    border-bottom: 2px solid #e0e0e0;
+    white-space: nowrap;
+  }
+
+  .prose :global(td) {
+    padding: 11px 16px;
+    color: #333;
+    border-bottom: 1px solid #f0f0f0;
+    line-height: 1.6;
+  }
+
+  .prose :global(tbody tr:hover) {
+    background: #fafafa;
   }
 
   .prose :global(figure) {

@@ -58,6 +58,19 @@ const reviewsCollection = defineCollection({
   }),
 });
 
+const postsCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    publishedAt: z.string(),
+    author: z.string().default('TechPulse'),
+    tags: z.array(z.string()).default([]),
+    notionPageId: z.string().optional(),
+  }),
+});
+
 export const collections = {
   'reviews': reviewsCollection,
+  'posts': postsCollection,
 };

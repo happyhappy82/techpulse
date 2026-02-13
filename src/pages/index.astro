@@ -2,18 +2,10 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import { getCollection } from 'astro:content';
-import { getPublishedPosts } from '../lib/notion';
 
-// Markdown 리뷰 가져오기
+// Content Collection에서 가져오기
 const allReviews = await getCollection('reviews');
-
-// Notion 게시글 가져오기
-let notionPosts: any[] = [];
-try {
-  notionPosts = await getPublishedPosts();
-} catch (e) {
-  console.warn('Notion fetch failed:', e);
-}
+const allNotionPosts = await getCollection('posts');
 
 // 총 점수 계산
 function calculateTotalScore(scores: any) {
@@ -46,14 +38,14 @@ const reviewPosts: UnifiedPost[] = allReviews.map((review) => ({
   score: calculateTotalScore(review.data.scores),
 }));
 
-// Notion 포스트 → 통합 포스트
-const notionUnified: UnifiedPost[] = notionPosts.map((post) => ({
+// Notion 포스트 → 통합 포스트 (Content Collection 기반)
+const notionUnified: UnifiedPost[] = allNotionPosts.map((post) => ({
   type: 'notion' as const,
-  title: post.title,
-  description: post.excerpt || '',
-  date: post.date,
+  title: post.data.title,
+  description: post.data.description || '',
+  date: post.data.publishedAt,
   href: `/posts/${post.slug}`,
-  tags: post.tags,
+  tags: post.data.tags || [],
   score: undefined,
 }));
 
