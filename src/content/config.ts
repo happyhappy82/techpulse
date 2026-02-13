@@ -1,5 +1,5 @@
 import { defineCollection, z } from 'astro:content';
-// content store cache bust
+// v2
 
 const reviewsCollection = defineCollection({
   type: 'content',
