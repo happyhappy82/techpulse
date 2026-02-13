@@ -1,10 +1,17 @@
 /**
  * TechPulse - Notion → Markdown 자동 변환 스크립트
- * Notion DB에서 Published 글을 모두 가져와 .md 파일로 저장 (노파싱 방식)
+ * 노파싱 방식: notion-to-md로 자동 변환
+ *
+ * 환경변수:
+ *   NOTION_API_KEY / NOTION_TOKEN  - Notion API 키
+ *   NOTION_DATABASE_ID             - Notion 데이터베이스 ID
+ *   SYNC_ACTION                    - 동작 (publish / delete / 미설정=전체동기화)
+ *   SYNC_PAGE_ID                   - 특정 페이지 ID (웹훅 발행 시)
+ *   TRIGGER_TYPE                   - 트리거 유형 (schedule / repository_dispatch / workflow_dispatch)
  *
  * 사용법:
- *   node scripts/sync-notion.cjs                    # DB 전체 Published 글 동기화
- *   node scripts/sync-notion.cjs <PAGE_ID>          # 특정 페이지만 변환
+ *   node scripts/sync-notion.cjs                    # DB 전체 동기화 (예약 발행)
+ *   node scripts/sync-notion.cjs <PAGE_ID>          # 특정 페이지만 (웹훅 발행)
  */
 
 const { Client } = require('@notionhq/client');
@@ -12,55 +19,110 @@ const { NotionToMarkdown } = require('notion-to-md');
 const fs = require('fs');
 const path = require('path');
 
-// .env 파일 로드
-const envPath = require('path').join(__dirname, '..', '.env');
-if (require('fs').existsSync(envPath)) {
-  const envContent = require('fs').readFileSync(envPath, 'utf-8');
+// ── .env 파일 로드 ──
+const envPath = path.join(__dirname, '..', '.env');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf-8');
   envContent.split('\n').forEach(line => {
     const [key, ...vals] = line.split('=');
     if (key && vals.length) process.env[key.trim()] = vals.join('=').trim();
   });
 }
 
-const NOTION_API_KEY = process.env.NOTION_TOKEN;
+// ── 설정 ──
+const NOTION_API_KEY = process.env.NOTION_API_KEY || process.env.NOTION_TOKEN;
 const DATABASE_ID = process.env.NOTION_DATABASE_ID;
+const SYNC_ACTION = process.env.SYNC_ACTION || '';
+const SYNC_PAGE_ID = process.env.SYNC_PAGE_ID || process.argv[2] || '';
+const TRIGGER_TYPE = process.env.TRIGGER_TYPE || 'manual';
+const OUTPUT_DIR = path.join(__dirname, '..', 'src', 'content', 'posts');
 
 if (!NOTION_API_KEY || !DATABASE_ID) {
-  console.error('NOTION_TOKEN 또는 NOTION_DATABASE_ID 환경변수가 설정되지 않았습니다.');
-  console.error('.env 파일을 확인하세요.');
+  console.error('NOTION_API_KEY/NOTION_TOKEN 또는 NOTION_DATABASE_ID 환경변수가 설정되지 않았습니다.');
+  console.error('.env 파일 또는 GitHub Secrets를 확인하세요.');
   process.exit(1);
 }
 
 const notion = new Client({ auth: NOTION_API_KEY });
 const n2m = new NotionToMarkdown({ notionClient: notion });
 
-// 단일 페이지 변환
-async function syncPage(pageId) {
-  console.log(`\n--- 페이지 변환 중 (${pageId}) ---`);
+// ── 기존 .md 파일에서 notionPageId → 슬러그 매핑 ──
+function getExistingPageMap() {
+  const map = {}; // { notionPageId: { slug, filePath } }
+  if (!fs.existsSync(OUTPUT_DIR)) return map;
+
+  const files = fs.readdirSync(OUTPUT_DIR).filter(f => f.endsWith('.md'));
+  for (const file of files) {
+    const filePath = path.join(OUTPUT_DIR, file);
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const match = content.match(/notionPageId:\s*"([^"]+)"/);
+    if (match) {
+      const slug = file.replace(/\.md$/, '');
+      map[match[1]] = { slug, filePath };
+    }
+  }
+  return map;
+}
+
+// ── 단일 페이지 변환 ──
+async function syncPage(pageId, existingMap) {
+  console.log(`\n--- 페이지 처리 중 (${pageId}) ---`);
 
   const page = await notion.pages.retrieve({ page_id: pageId });
 
+  // Status 확인
+  const status = page.properties.Status?.status?.name || '';
+  console.log(`   Status: ${status}`);
+
+  // ▶ Deleted → 파일 삭제
+  if (status === 'Deleted' || status === 'deleted') {
+    const existing = existingMap[pageId];
+    if (existing && fs.existsSync(existing.filePath)) {
+      fs.unlinkSync(existing.filePath);
+      console.log(`   🗑️  삭제 완료: ${existing.filePath}`);
+      return { action: 'deleted', slug: existing.slug };
+    }
+    console.log(`   삭제할 파일 없음 (이미 삭제됨)`);
+    return { action: 'skipped' };
+  }
+
+  // ▶ Published가 아니면 스킵
+  if (status !== 'Published') {
+    console.log(`   ⏭️  스킵: Status="${status}" (Published만 처리)`);
+    return { action: 'skipped' };
+  }
+
+  // ▶ 페이지 속성 추출
   const title = page.properties.Title?.title?.[0]?.plain_text || '제목 없음';
   const date = page.properties.Date?.date?.start || new Date().toISOString().split('T')[0];
   const excerpt = page.properties.Excerpt?.rich_text?.[0]?.plain_text || '';
-  const slug = page.properties.Slug?.rich_text?.[0]?.plain_text || '';
+  const notionSlug = page.properties.Slug?.rich_text?.[0]?.plain_text || '';
   const tags = page.properties.Tags?.multi_select?.map(t => t.name) || [];
 
   console.log(`   제목: ${title}`);
-  console.log(`   Slug: ${slug || '(비어있음)'}`);
   console.log(`   태그: ${tags.join(', ') || '(없음)'}`);
 
-  // notion-to-md로 마크다운 변환
+  // ▶ 슬러그 결정: 기존 파일이 있으면 반드시 유지
+  const existing = existingMap[pageId];
+  let fileSlug;
+  if (existing) {
+    fileSlug = existing.slug;
+    console.log(`   📌 기존 슬러그 유지: ${fileSlug}`);
+  } else {
+    fileSlug = notionSlug || title.replace(/\s+/g, '-').toLowerCase();
+    console.log(`   🆕 신규 슬러그: ${fileSlug}`);
+  }
+
+  // ▶ notion-to-md로 마크다운 변환
   const mdBlocks = await n2m.pageToMarkdown(pageId);
   const mdString = n2m.toMarkdownString(mdBlocks);
   const markdownContent = typeof mdString === 'string' ? mdString : mdString.parent;
 
   console.log(`   마크다운 길이: ${markdownContent.length}자`);
 
-  // frontmatter 생성
+  // ▶ frontmatter 생성
   const dateFormatted = date.split('T')[0];
   const autoExcerpt = excerpt || markdownContent.substring(0, 150).replace(/[#*\n]/g, '').trim() + '...';
-  const fileSlug = slug || title.replace(/\s+/g, '-').toLowerCase();
 
   const frontmatter = `---
 title: "${title.replace(/"/g, '\\"')}"
@@ -73,57 +135,114 @@ notionPageId: "${pageId}"
 
   const fullContent = `${frontmatter}\n\n${markdownContent}`;
 
-  // posts 폴더에 저장
-  const outputDir = path.join(__dirname, '..', 'src', 'content', 'posts');
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
+  // ▶ 저장
+  if (!fs.existsSync(OUTPUT_DIR)) {
+    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
   }
 
-  const outputPath = path.join(outputDir, `${fileSlug}.md`);
+  const outputPath = path.join(OUTPUT_DIR, `${fileSlug}.md`);
   fs.writeFileSync(outputPath, fullContent, 'utf-8');
-  console.log(`   저장: ${outputPath}`);
+  console.log(`   💾 저장: ${outputPath}`);
 
-  return { title, fileSlug, outputPath };
+  // ▶ 신규 발행이면 .published-slug 기록
+  if (!existing) {
+    const slugFile = path.join(__dirname, '..', '.published-slug');
+    fs.writeFileSync(slugFile, fileSlug, 'utf-8');
+    console.log(`   📢 신규 발행 → .published-slug: ${fileSlug}`);
+  }
+
+  return {
+    action: existing ? 'updated' : 'created',
+    title,
+    slug: fileSlug,
+    outputPath,
+  };
 }
 
-// DB에서 모든 Published 글 가져와서 동기화
+// ── DB 전체 동기화 (예약 발행) ──
 async function syncAll() {
-  console.log('\n=== Notion DB 전체 동기화 시작 ===\n');
+  console.log('\n=== Notion DB 전체 동기화 시작 ===');
+  console.log(`트리거: ${TRIGGER_TYPE}\n`);
 
-  const response = await notion.databases.query({
+  const existingMap = getExistingPageMap();
+  console.log(`기존 포스트: ${Object.keys(existingMap).length}개`);
+
+  // Published 글 가져오기
+  const publishedRes = await notion.databases.query({
     database_id: DATABASE_ID,
-    filter: {
-      property: 'Status',
-      status: {
-        equals: 'Published',
-      },
-    },
-    sorts: [
-      { property: 'Date', direction: 'descending' },
-    ],
+    filter: { property: 'Status', status: { equals: 'Published' } },
+    sorts: [{ property: 'Date', direction: 'descending' }],
   });
+  const publishedPages = publishedRes.results;
+  console.log(`Published 글: ${publishedPages.length}개 발견`);
 
-  const pages = response.results;
-  console.log(`Published 글 ${pages.length}개 발견\n`);
+  // Deleted 글 가져오기
+  let deletedPages = [];
+  try {
+    const deletedRes = await notion.databases.query({
+      database_id: DATABASE_ID,
+      filter: { property: 'Status', status: { equals: 'Deleted' } },
+    });
+    deletedPages = deletedRes.results;
+    if (deletedPages.length > 0) {
+      console.log(`Deleted 글: ${deletedPages.length}개 발견`);
+    }
+  } catch (err) {
+    console.log('Deleted 상태 조회 스킵 (상태 없을 수 있음)');
+  }
 
-  const results = [];
-  for (const page of pages) {
+  const results = { created: 0, updated: 0, deleted: 0, skipped: 0 };
+
+  // Published 동기화
+  for (const page of publishedPages) {
     try {
-      const result = await syncPage(page.id);
-      results.push(result);
+      const r = await syncPage(page.id, existingMap);
+      results[r.action] = (results[r.action] || 0) + 1;
     } catch (err) {
-      console.error(`   에러: ${err.message}`);
+      console.error(`   ❌ 에러: ${err.message}`);
     }
   }
 
-  console.log(`\n=== 동기화 완료: ${results.length}/${pages.length}개 성공 ===\n`);
+  // Deleted 처리
+  for (const page of deletedPages) {
+    try {
+      const r = await syncPage(page.id, existingMap);
+      results[r.action] = (results[r.action] || 0) + 1;
+    } catch (err) {
+      console.error(`   ❌ 에러: ${err.message}`);
+    }
+  }
+
+  console.log(`\n=== 동기화 완료 ===`);
+  console.log(`   🆕 신규: ${results.created}개`);
+  console.log(`   ✏️  수정: ${results.updated}개`);
+  console.log(`   🗑️  삭제: ${results.deleted}개`);
+  console.log(`   ⏭️  스킵: ${results.skipped}개\n`);
+
   return results;
 }
 
-// 실행
-const singlePageId = process.argv[2];
-if (singlePageId) {
-  syncPage(singlePageId).catch(err => {
+// ── 단일 페이지 웹훅 처리 ──
+async function syncSinglePage(pageId) {
+  console.log(`\n=== 웹훅 발행: 단일 페이지 동기화 ===`);
+  console.log(`페이지 ID: ${pageId}`);
+  console.log(`액션: ${SYNC_ACTION || '자동 감지'}\n`);
+
+  const existingMap = getExistingPageMap();
+
+  try {
+    const result = await syncPage(pageId, existingMap);
+    console.log(`\n=== 완료: ${result.action} ===\n`);
+    return result;
+  } catch (err) {
+    console.error(`에러 발생: ${err.message}`);
+    process.exit(1);
+  }
+}
+
+// ── 실행 ──
+if (SYNC_PAGE_ID) {
+  syncSinglePage(SYNC_PAGE_ID).catch(err => {
     console.error('에러 발생:', err.message);
     process.exit(1);
   });
