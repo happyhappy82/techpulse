@@ -72,6 +72,48 @@ const description = post.data.description;
   </footer>
 </BaseLayout>
 
+<script>
+  // FAQ 섹션 자동 감지 → 카드 스타일 래핑
+  document.querySelectorAll('.prose h2').forEach(h2 => {
+    if (!h2.textContent?.includes('자주 묻는 질문')) return;
+    h2.classList.add('faq-heading');
+
+    let el = h2.nextElementSibling;
+    while (el) {
+      const next = el.nextElementSibling;
+      if (el.tagName === 'H2') break; // 다음 섹션이면 중단
+
+      if (el.tagName === 'H3') {
+        const card = document.createElement('div');
+        card.className = 'faq-card';
+
+        const question = document.createElement('div');
+        question.className = 'faq-question';
+        question.innerHTML = '<span class="faq-q">Q</span>' + el.innerHTML;
+
+        card.appendChild(question);
+
+        // h3 다음의 p들을 답변으로 모음
+        let answer = next;
+        const answerDiv = document.createElement('div');
+        answerDiv.className = 'faq-answer';
+
+        while (answer && answer.tagName !== 'H3' && answer.tagName !== 'H2') {
+          const nextAnswer = answer.nextElementSibling;
+          answerDiv.appendChild(answer);
+          answer = nextAnswer;
+        }
+
+        card.appendChild(answerDiv);
+        el.replaceWith(card);
+        el = answer;
+      } else {
+        el = next;
+      }
+    }
+  });
+</script>
+
 <style>
   main {
     max-width: 800px;
@@ -351,6 +393,66 @@ const description = post.data.description;
     flex-shrink: 0;
   }
 
+  /* FAQ 섹션 */
+  .prose :global(.faq-heading) {
+    border-bottom: none;
+    text-align: center;
+    font-size: 26px;
+    margin-bottom: 28px;
+  }
+
+  .prose :global(.faq-card) {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .prose :global(.faq-card:hover) {
+    border-color: #d1d5db;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .prose :global(.faq-question) {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 17px;
+    font-weight: 600;
+    color: #111;
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  .prose :global(.faq-q) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    background: #2563eb;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 8px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .prose :global(.faq-answer) {
+    padding-left: 40px;
+    color: #555;
+  }
+
+  .prose :global(.faq-answer p) {
+    font-size: 15.5px;
+    line-height: 1.8;
+    color: #555;
+    margin-bottom: 0;
+  }
+
   /* Footer */
   .footer {
     max-width: 800px;
@@ -404,6 +506,18 @@ const description = post.data.description;
     .prose :global(th),
     .prose :global(td) {
       padding: 10px 12px;
+    }
+
+    .prose :global(.faq-card) {
+      padding: 20px;
+    }
+
+    .prose :global(.faq-question) {
+      font-size: 16px;
+    }
+
+    .prose :global(.faq-answer) {
+      padding-left: 40px;
     }
 
     .footer {
