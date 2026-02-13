@@ -2,20 +2,65 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import { getCollection } from 'astro:content';
+import { getPublishedPosts } from '../lib/notion';
 
+// Markdown 리뷰 가져오기
 const allReviews = await getCollection('reviews');
 
-// 최신순 정렬
-const sortedReviews = allReviews.sort(
-  (a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime()
-);
+// Notion 게시글 가져오기
+let notionPosts: any[] = [];
+try {
+  notionPosts = await getPublishedPosts();
+} catch (e) {
+  console.warn('Notion fetch failed:', e);
+}
 
-// 카테고리 한글 매핑
-const categoryMap: Record<string, string> = {
-  laptop: 'Laptop',
-  smartphone: 'Phone',
-  gadget: 'Gadget',
-};
+// 총 점수 계산
+function calculateTotalScore(scores: any) {
+  const { performance, design, display, battery, value } = scores;
+  if (display === 0) {
+    return Math.round((performance + design + battery + value) / 4);
+  }
+  return Math.round((performance + design + display + battery + value) / 5);
+}
+
+// 통합 포스트 타입
+interface UnifiedPost {
+  type: 'review' | 'notion';
+  title: string;
+  description: string;
+  date: string;
+  href: string;
+  tags: string[];
+  score?: number;
+}
+
+// Markdown 리뷰 → 통합 포스트
+const reviewPosts: UnifiedPost[] = allReviews.map((review) => ({
+  type: 'review' as const,
+  title: review.data.product.name,
+  description: review.data.description,
+  date: review.data.publishedAt,
+  href: `/reviews/${review.slug}`,
+  tags: [review.data.product.category],
+  score: calculateTotalScore(review.data.scores),
+}));
+
+// Notion 포스트 → 통합 포스트
+const notionUnified: UnifiedPost[] = notionPosts.map((post) => ({
+  type: 'notion' as const,
+  title: post.title,
+  description: post.excerpt || '',
+  date: post.date,
+  href: `/posts/${post.slug}`,
+  tags: post.tags,
+  score: undefined,
+}));
+
+// 합치고 최신순 정렬
+const allPosts = [...reviewPosts, ...notionUnified].sort(
+  (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+);
 
 // 날짜 포맷
 function formatDate(dateStr: string) {
@@ -27,13 +72,17 @@ function formatDate(dateStr: string) {
   });
 }
 
-// 총 점수 계산
-function calculateTotalScore(scores: any) {
-  const { performance, design, display, battery, value } = scores;
-  if (display === 0) {
-    return Math.round((performance + design + battery + value) / 4);
-  }
-  return Math.round((performance + design + display + battery + value) / 5);
+// 태그 표시 이름
+const tagNames: Record<string, string> = {
+  laptop: 'Laptop',
+  smartphone: 'Phone',
+  gadget: 'Gadget',
+};
+
+function getTagDisplay(tags: string[]): string {
+  if (!tags || tags.length === 0) return '';
+  const first = tags[0];
+  return tagNames[first] || first;
 }
 
 const title = 'TechPulse - Blog';
@@ -52,26 +101,24 @@ const description = '최신 전자제품 리뷰와 비교 분석. 노트북, 스
       <div class="post-list-header">
         <span class="col-date">Date</span>
         <span class="col-title">Title</span>
-        <span class="col-category">Category</span>
-        <span class="col-score">Score</span>
+        <span class="col-category">Tag</span>
       </div>
 
-      {sortedReviews.map((review) => (
-        <a href={`/reviews/${review.slug}`} class="post-row">
+      {allPosts.map((post) => (
+        <a href={post.href} class="post-row">
           <span class="col-date">
-            <time datetime={review.data.publishedAt}>
-              {formatDate(review.data.publishedAt)}
+            <time datetime={post.date}>
+              {formatDate(post.date)}
             </time>
           </span>
           <span class="col-title">
-            <span class="post-name">{review.data.product.name}</span>
-            <span class="post-desc">{review.data.description}</span>
+            <span class="post-name">{post.title}</span>
+            {post.description && <span class="post-desc">{post.description}</span>}
           </span>
           <span class="col-category">
-            <span class="category-tag">{categoryMap[review.data.product.category]}</span>
-          </span>
-          <span class="col-score">
-            <span class="score-value">{calculateTotalScore(review.data.scores)}</span>
+            {getTagDisplay(post.tags) && (
+              <span class="category-tag">{getTagDisplay(post.tags)}</span>
+            )}
           </span>
         </a>
       ))}
@@ -109,7 +156,7 @@ const description = '최신 전자제품 리뷰와 비교 분석. 노트북, 스
 
   .post-list-header {
     display: grid;
-    grid-template-columns: 140px 1fr 100px 60px;
+    grid-template-columns: 140px 1fr 100px;
     gap: 16px;
     padding: 12px 0;
     border-bottom: 1px solid #e5e5e5;
@@ -122,7 +169,7 @@ const description = '최신 전자제품 리뷰와 비교 분석. 노트북, 스
 
   .post-row {
     display: grid;
-    grid-template-columns: 140px 1fr 100px 60px;
+    grid-template-columns: 140px 1fr 100px;
     gap: 16px;
     padding: 20px 0;
     border-bottom: 1px solid #f0f0f0;
@@ -183,19 +230,6 @@ const description = '최신 전자제품 리뷰와 비교 분석. 노트북, 스
     border: 1px solid #e5e5e5;
   }
 
-  .col-score {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-  }
-
-  .score-value {
-    font-size: 14px;
-    font-weight: 600;
-    color: #000;
-    font-variant-numeric: tabular-nums;
-  }
-
   /* Footer */
   .footer {
     max-width: 1400px;
@@ -241,24 +275,11 @@ const description = '최신 전자제품 리뷰와 비교 분석. 노트북, 스
     }
 
     .col-title {
-      order: 2;
+      order: 0;
     }
 
     .col-category {
-      order: 3;
-    }
-
-    .col-score {
-      order: 0;
-      justify-content: flex-start;
-    }
-
-    .score-value {
-      font-size: 13px;
-      background: #000;
-      color: #fff;
-      padding: 2px 8px;
-      border-radius: 4px;
+      order: 2;
     }
 
     .footer {
