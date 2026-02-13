@@ -2,10 +2,7 @@ name: Sync Notion to Posts
 
 on:
   schedule:
-    - cron: '0 1 * * *'  # 매일 오전 10시 (KST)
-    - cron: '0 4 * * *'  # 매일 오후 1시 (KST)
-    - cron: '0 9 * * *'  # 매일 오후 6시 (KST)
-    - cron: '0 11 * * *' # 매일 저녁 8시 (KST)
+    - cron: '0 */3 * * *' # 3시간 간격, 하루 8회 (KST 0시/3시/6시/9시/12시/15시/18시/21시)
   workflow_dispatch:
   repository_dispatch:
     types: [notion-webhook]
