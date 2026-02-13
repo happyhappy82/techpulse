@@ -95,6 +95,14 @@ async function syncPage(pageId, existingMap) {
   // ▶ 페이지 속성 추출
   const title = page.properties.Title?.title?.[0]?.plain_text || '제목 없음';
   const date = page.properties.Date?.date?.start || new Date().toISOString().split('T')[0];
+
+  // ▶ 미래 날짜면 스킵 (예약 발행)
+  const today = new Date().toISOString().split('T')[0];
+  if (date > today) {
+    console.log(`   ⏭️  스킵: 예약 발행 (${date} > 오늘 ${today})`);
+    return { action: 'skipped' };
+  }
+
   const excerpt = page.properties.Excerpt?.rich_text?.[0]?.plain_text || '';
   const notionSlug = page.properties.Slug?.rich_text?.[0]?.plain_text || '';
   const tags = page.properties.Tags?.multi_select?.map(t => t.name) || [];
