@@ -22,3 +22,13 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# 프롬프트 및 정책 문서 (DB 주소 등 민감정보 포함)
+프롬프트*
+
+# 임시 파일
+.published-slug
+*.png
+
+# playwright
+.playwright-mcp/
