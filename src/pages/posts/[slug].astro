@@ -5,12 +5,17 @@ import { getAllPosts, getPostBySlug, getPageBlocks, blocksToHtml } from '../../l
 
 // Static paths 생성
 export async function getStaticPaths() {
-  const posts = await getAllPosts();
-  return posts
-    .filter((post) => post.slug)
-    .map((post) => ({
-      params: { slug: post.slug },
-    }));
+  try {
+    const posts = await getAllPosts();
+    return posts
+      .filter((post) => post.slug)
+      .map((post) => ({
+        params: { slug: post.slug },
+      }));
+  } catch (e) {
+    console.warn('Notion fetch failed in getStaticPaths:', e);
+    return [];
+  }
 }
 
 const { slug } = Astro.params;
