@@ -46,6 +46,17 @@ if (!NOTION_API_KEY || !DATABASE_ID) {
 const notion = new Client({ auth: NOTION_API_KEY });
 const n2m = new NotionToMarkdown({ notionClient: notion });
 
+// ── 슬러그 정규화: URL-unsafe 문자 제거 ──
+function sanitizeSlug(raw) {
+  return raw
+    .replace(/[?!@#$%^&*()+=\[\]{}<>|\\/"'`;:~]/g, '') // 특수문자 제거
+    .replace(/,/g, '')           // 쉼표 제거
+    .replace(/\s+/g, '-')        // 공백 → 하이픈
+    .replace(/-{2,}/g, '-')      // 연속 하이픈 정리
+    .replace(/^-|-$/g, '')       // 앞뒤 하이픈 제거
+    .toLowerCase();
+}
+
 // ── 기존 .md 파일에서 notionPageId → 슬러그 매핑 ──
 function getExistingPageMap() {
   const map = {}; // { notionPageId: { slug, filePath } }
@@ -118,14 +129,25 @@ async function syncPage(pageId, existingMap) {
   console.log(`   제목: ${title}`);
   console.log(`   태그: ${tags.join(', ') || '(없음)'}`);
 
-  // ▶ 슬러그 결정: 기존 파일이 있으면 반드시 유지
+  // ▶ 슬러그 결정: 기존 파일이 있으면 유지 (단, 깨진 슬러그는 자동 수정)
   const existing = existingMap[pageId];
   let fileSlug;
   if (existing) {
-    fileSlug = existing.slug;
-    console.log(`   📌 기존 슬러그 유지: ${fileSlug}`);
+    const cleanSlug = sanitizeSlug(existing.slug);
+    if (cleanSlug !== existing.slug) {
+      // 기존 슬러그에 특수문자가 있으면 리네임
+      const newPath = path.join(OUTPUT_DIR, `${cleanSlug}.md`);
+      if (fs.existsSync(existing.filePath)) {
+        fs.unlinkSync(existing.filePath);
+        console.log(`   🔧 깨진 슬러그 수정: ${existing.slug} → ${cleanSlug}`);
+      }
+      fileSlug = cleanSlug;
+    } else {
+      fileSlug = existing.slug;
+      console.log(`   📌 기존 슬러그 유지: ${fileSlug}`);
+    }
   } else {
-    fileSlug = notionSlug || title.replace(/\s+/g, '-').toLowerCase();
+    fileSlug = sanitizeSlug(notionSlug || title.replace(/\s+/g, '-').toLowerCase());
     console.log(`   🆕 신규 슬러그: ${fileSlug}`);
   }
 
