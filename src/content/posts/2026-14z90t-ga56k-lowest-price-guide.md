@@ -1,6 +1,6 @@
 ---
 title: "2026 14Z90T-GA56K 최저가 구매가이드 (할인·쿠폰·카드혜택)"
-description: "14Z90T-GA56K의 밸런스형 선택 기준과 할인·쿠폰·카드혜택 적용 체크루틴을 2026-02-17 기준으로 정리한 구매 초안입니다."
+description: "14Z90T-GA56K의 밸런스형 선택 기준과 할인·쿠폰·카드혜택 적용에 대한 글입니다."
 publishedAt: "2026-02-17"
 author: "Tech Price Guide"
 tags: []
