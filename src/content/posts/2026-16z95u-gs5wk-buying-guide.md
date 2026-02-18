@@ -1,5 +1,5 @@
 ---
-title: "2026 16Z95U-GS5WK 싸게 사는 방법은?"
+title: "2026 16Z95U-GS5WK 스펙·장단점 비교 가이드"
 description: "16Z95U-GS5WK를 구매 전 검증 루틴 중심으로 정리한 2026 실전 가이드. 가격 숫자 대신 조건 확인과 전환 동선에 집중합니다."
 publishedAt: "2026-02-13"
 author: "Tech Price Guide"

@@ -1,5 +1,5 @@
 ---
-title: "2026 16Z90TP-GA5CK 싸게 사는 방법은?"
+title: "2026 16Z90TP-GA5CK 스펙·장단점 비교 가이드"
 description: "16Z90TP-GA5CK를 재택근무·업무형 사용자 관점으로 정리한 2026 구매 가이드. 가격 숫자 없이 코드 정확도와 조건 비교 중심으로 구성했습니다."
 publishedAt: "2026-02-17"
 author: "Tech Price Guide"
