@@ -114,9 +114,9 @@ notionPageId: "30b753eb-c013-81b3-acca-fa70b3d806c9"
 
 ## 같이 보면 좋은 글
 
-- [2026 델 인스피론 15 7000 스펙·장단점·후기 비교 가이드](https://www.techpriceguide.xyz/articles/2026-dell-inspiron-15-7000-spec-pros-cons-review-guide)
-- [2026 델 인스피론 7501 스펙·장단점·후기 비교 가이드](https://www.techpriceguide.xyz/articles/2026-dell-inspiron-7501-spec-pros-cons-review-guide)
-- [2026 Dell XPS 14 스펙·장단점·후기 비교 가이드](https://www.techpriceguide.xyz/articles/2026-dell-xps-14-spec-pros-cons-review-guide)
+- [2026 Dell Inspiron 15 실속형 리뷰: 가성비와 업그레이드 포인트](https://www.techpriceguide.xyz/posts/2026-dell-inspiron-15-spec-pros-cons-review-guide)
+- [2026 Dell XPS 16 실사용 리뷰: 크리에이터용으로 괜찮을까](https://www.techpriceguide.xyz/posts/2026-dell-xps-16-spec-pros-cons-review-guide)
+- [2026 Dell XPS 14 구매 가이드: 휴대성·성능 균형 리뷰](https://www.techpriceguide.xyz/posts/2026-dell-xps-14-spec-pros-cons-review-guide)
 
 ## 참고 링크
 
