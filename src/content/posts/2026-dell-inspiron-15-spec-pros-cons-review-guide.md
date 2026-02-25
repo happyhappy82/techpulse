@@ -131,9 +131,9 @@ notionPageId: "30b753eb-c013-8191-a78e-cf69cac7cc8d"
 
 ## 같이 보면 좋은 글
 
-- [2026 델 인스피론 16 스펙·장단점·후기 비교 가이드](https://www.techpriceguide.xyz/articles/2026-dell-inspiron-16-spec-pros-cons-review-guide)
-- [2026 델 인스피론 14 스펙·장단점·후기 비교 가이드](https://www.techpriceguide.xyz/articles/2026-dell-inspiron-14-spec-pros-cons-review-guide)
-- [2026 Dell Pro 14 스펙·장단점·후기 비교 가이드](https://www.techpriceguide.xyz/articles/2026-dell-pro-14-spec-pros-cons-review-guide)
+- [2026 델 인스피론 7590 아직 쓸만할까? 체감 성능 체크](https://www.techpriceguide.xyz/posts/2026-dell-inspiron-7590-spec-pros-cons-review-guide)
+- [2026 Dell Pro 14 업무용 추천 이유: 휴대성·배터리·포트 점검](https://www.techpriceguide.xyz/posts/2026-dell-pro-14-spec-pros-cons-review-guide)
+- [2026 Dell XPS 14 구매 가이드: 휴대성·성능 균형 리뷰](https://www.techpriceguide.xyz/posts/2026-dell-xps-14-spec-pros-cons-review-guide)
 
 ## 참고 링크
 
