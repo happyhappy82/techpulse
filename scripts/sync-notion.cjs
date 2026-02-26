@@ -205,23 +205,34 @@ async function syncAll() {
   const existingMap = getExistingPageMap();
   console.log(`기존 포스트: ${Object.keys(existingMap).length}개`);
 
-  // Published 글 가져오기
-  const publishedRes = await notion.databases.query({
-    database_id: DATABASE_ID,
-    filter: { property: 'Status', status: { equals: 'Published' } },
-    sorts: [{ property: 'Date', direction: 'descending' }],
-  });
-  const publishedPages = publishedRes.results;
+  // Published 글 가져오기 (페이지네이션으로 전체 조회)
+  let publishedPages = [];
+  let cursor = undefined;
+  do {
+    const res = await notion.databases.query({
+      database_id: DATABASE_ID,
+      filter: { property: 'Status', status: { equals: 'Published' } },
+      sorts: [{ property: 'Date', direction: 'descending' }],
+      start_cursor: cursor,
+    });
+    publishedPages.push(...res.results);
+    cursor = res.has_more ? res.next_cursor : undefined;
+  } while (cursor);
   console.log(`Published 글: ${publishedPages.length}개 발견`);
 
-  // Deleted 글 가져오기
+  // Deleted 글 가져오기 (페이지네이션으로 전체 조회)
   let deletedPages = [];
   try {
-    const deletedRes = await notion.databases.query({
-      database_id: DATABASE_ID,
-      filter: { property: 'Status', status: { equals: 'Deleted' } },
-    });
-    deletedPages = deletedRes.results;
+    let delCursor = undefined;
+    do {
+      const res = await notion.databases.query({
+        database_id: DATABASE_ID,
+        filter: { property: 'Status', status: { equals: 'Deleted' } },
+        start_cursor: delCursor,
+      });
+      deletedPages.push(...res.results);
+      delCursor = res.has_more ? res.next_cursor : undefined;
+    } while (delCursor);
     if (deletedPages.length > 0) {
       console.log(`Deleted 글: ${deletedPages.length}개 발견`);
     }
